@@ -1,0 +1,48 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "d4eabacfa5524fe48fec440198304320e07b9911fb716b1f3f41d8a819708f6d"
+        },
+        "requires": {},
+        "sources": [
+            {
+                "url": "https://pypi.python.org/simple",
+                "verify_ssl": true
+            }
+        ]
+    },
+    "default": {
+        "six": {
+            "version": "==1.10.0"
+        }
+    },
+    "develop": {
+        "coverage": {
+            "version": "==4.4.1"
+        },
+        "pluggy": {
+            "version": "==0.4.0"
+        },
+        "py": {
+            "version": "==1.4.34"
+        },
+        "pytest": {
+            "version": "==3.2.1"
+        },
+        "pytest-cov": {
+            "version": "==2.5.1"
+        },
+        "pytest-pythonpath": {
+            "version": "==0.7.1"
+        },
+        "setuptools": {
+            "version": "==36.2.7"
+        },
+        "tox": {
+            "version": "==2.7.0"
+        },
+        "virtualenv": {
+            "version": "==15.1.0"
+        }
+    }
+}
