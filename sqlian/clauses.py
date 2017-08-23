@@ -30,6 +30,10 @@ class Where(Clause):
         super(Where, self).__init__(condition)
 
 
+class GroupBy(Clause):
+    pass
+
+
 class OrderBy(Clause):
     pass
 

@@ -35,73 +35,78 @@ class Ref(Expression):
         )
 
 
+class Param(Expression):
+
+    def __init__(self, name):
+        super(Param, self).__init__()
+        self.name = name
+
+    def __repr__(self):
+        return '<Param %({})s>'.format(self.name)
+
+    def __sql__(self):
+        return Sql('%({})s'.format(self.name))
+
+
 class Condition(Expression):
     """Condition is a specialized expression that evaluates to a boolean.
     """
-
-
-class UnarySuffix(Condition):
-
-    def __init__(self, p):
-        self.operand = p
+    def __init__(self, *ps):
+        self.operands = ps
 
     def __repr__(self):
         return '<Condition {!r}>'.format(str(sql(self)))
 
+
+class Suffix(Condition):
     def __sql__(self):
-        return Sql('{0} {op}').format(self.operand, op=Sql(self.operator))
+        return Sql('{} {}').format(
+            Sql(' ').join(self.operands), Sql(self.operator),
+        )
 
 
-class BinaryInfix(Condition):
-
-    def __init__(self, p1, p2):
-        self.operands = (p1, p2)
-
-    def __repr__(self):
-        return '<Condition {!r}>'.format(str(sql(self)))
-
+class Infix(Condition):
     def __sql__(self):
-        kwargs = {'op': Sql(self.operator)}     # Python 2 & 3.4 compatibility.
-        return Sql('{0} {op} {1}').format(*self.operands, **kwargs)
+        return Sql(' {} '.format(self.operator)).join(self.operands)
 
 
-class IsNull(UnarySuffix):
+class IsNull(Suffix):
     operator = 'IS NULL'
 
 
-class IsNotNull(UnarySuffix):
+class IsNotNull(Suffix):
     operator = 'IS NOT NULL'
 
 
-class Equal(BinaryInfix):
+class Equal(Infix):
     operator = '='
 
 
-class NotEqual(BinaryInfix):
+class NotEqual(Infix):
     operator = '!='
 
 
-class GreaterThan(BinaryInfix):
+class GreaterThan(Infix):
     operator = '>'
 
 
-class LessThan(BinaryInfix):
+class LessThan(Infix):
     operator = '<'
 
 
-class GreaterThanOrEqual(BinaryInfix):
+class GreaterThanOrEqual(Infix):
     operator = '>='
 
 
-class LessThanOrEqual(BinaryInfix):
+class LessThanOrEqual(Infix):
     operator = '<='
 
 
-class Like(BinaryInfix):
+class Like(Infix):
     operator = 'LIKE'
 
 
-class In(BinaryInfix):
+class In(Infix):
 
     operator = 'IN'
 
@@ -112,12 +117,11 @@ class In(BinaryInfix):
         )
 
 
-class And(BinaryInfix):
+class And(Infix):
 
     operator = 'AND'
 
     def __sql__(self):
-        return Sql('({0}) {op} ({1})').format(
-            self.operands[0], self.operands[1],
-            op=Sql(self.operator),
+        return Sql(' {} '.format(self.operator)).join(
+            Sql('({})').format(o) for o in self.operands,
         )

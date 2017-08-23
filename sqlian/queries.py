@@ -68,6 +68,7 @@ class Select(Query):
         ('select', clauses.Select),
         ('from_', clauses.From),
         ('where', clauses.Where),
+        ('group_by', clauses.GroupBy),
         ('order_by', clauses.OrderBy),
         ('limit', clauses.Limit),
         ('offset', clauses.Offset),

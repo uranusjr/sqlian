@@ -3,6 +3,7 @@ from sqlian import (
     clauses as c,
     compositions as m,
     expressions as e,
+    functions as f,
     queries as q,
 )
 
@@ -128,3 +129,30 @@ def test_select_order_by_desc():
     assert sql(query) == """
         SELECT * FROM "person" WHERE "name" LIKE 'Mosky%' ORDER BY "age" DESC
     """.strip()
+
+
+def test_select_param():
+    query = q.Select(
+        c.Select(e.star),
+        c.From(e.Ref('table')),
+        c.Where(e.And(
+            e.Equal(e.Ref('auto_param'), e.Param('auto_param')),
+            e.Equal(e.Ref('using_alias'), e.Param('using_alias')),
+            e.Equal(e.Ref('custom_param'), e.Param('my_param')),
+        )),
+    )
+    assert sql(query) == (
+        'SELECT * FROM "table" '
+        'WHERE ("auto_param" = %(auto_param)s) '
+        'AND ("using_alias" = %(using_alias)s) '
+        'AND ("custom_param" = %(my_param)s)'
+    )
+
+
+def test_select_count():
+    query = q.Select(
+        c.Select(f.Count(e.star)),
+        c.From(e.Ref('person')),
+        c.GroupBy(e.Ref('age')),
+    )
+    assert sql(query) == 'SELECT COUNT(*) FROM "person" GROUP BY "age"'
