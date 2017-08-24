@@ -105,7 +105,3 @@ class Join(Composition, Named):
         if self.on_using is not None:
             parts.append(self.on_using)
         return Sql(' ').join(parts)
-
-
-def parse_native_as_value_list(values):
-    return List(*values)

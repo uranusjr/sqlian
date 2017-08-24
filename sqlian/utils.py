@@ -1,3 +1,8 @@
+import collections
+
+import six
+
+
 def sql_format_string_literal(value):
     # SQL standard: replace single quotes with pairs of them.
     value = value.replace("'", "''")
@@ -9,3 +14,10 @@ def sql_format_string_literal(value):
 def sql_format_identifier(name):
     # TODO: Escape special characters?
     return '"{}"'.format(name)
+
+
+def is_non_string_sequence(s):
+    return (
+        isinstance(s, collections.Sequence) and
+        not isinstance(s, six.string_types)
+    )

@@ -91,47 +91,7 @@ class Named(object):
         ))
 
 
-def ensure_sql(*trans):
-    """Coerce arguments of decorated function to SQL components.
+def ensure_sql(value, transform):
+    """Ensure value is a SQL component.
     """
-    def decorator(f):
-
-        def ensure(arg, transform):
-            if transform is None or hasattr(arg, '__sql__'):
-                return arg
-            return transform(arg)
-
-        @functools.wraps(f)
-        def checked_f(*args):
-            return f(*(
-                ensure(arg, transform)
-                for arg, transform in zip(
-                    args, (None,) * (len(args) - len(trans)) + trans,
-                )
-            ))
-
-        return checked_f
-
-    return decorator
-
-
-def ensure_sql_args(transform, skip_first=False):
-    """Coerce all arguments of decorated function to SQL components.
-    """
-    def decorator(f):
-
-        def ensure(arg):
-            if hasattr(arg, '__sql__'):
-                return arg
-            return transform(arg)
-
-        @functools.wraps(f)
-        def checked_f(*args):
-            if skip_first:
-                return f(args[0], *(ensure(arg) for arg in args[1:]))
-            else:
-                return f(*(ensure(arg) for arg in args))
-
-        return checked_f
-
-    return decorator
+    return value if hasattr(value, '__sql__') else transform(value)

@@ -18,3 +18,12 @@ def test_insert_values():
     """.strip()
 
 
+def test_insert_values_multiple():
+    query = insert('person', values=[
+        ('mosky', 'Mosky Liu'),
+        ('yiyu', 'Yi-Yu Liu'),
+    ])
+    assert query == (
+        'INSERT INTO "person" '
+        "VALUES ('mosky', 'Mosky Liu'), ('yiyu', 'Yi-Yu Liu')"
+    )

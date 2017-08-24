@@ -44,14 +44,14 @@ class Query(Named):
 
     def _map_clause_to_params(self, args, kwargs):
         param_clauses = {}
-        default_param_args = []
+        native_args = []
         cls_param = {klass: key for key, klass in self.param_classes}
         param_cls = {key: klass for key, klass in self.param_classes}
 
         for arg in args:
             no_match = True
             if not hasattr(arg, '__sql__'):
-                default_param_args.append(arg)
+                native_args.append(arg)
                 continue
             for klass in type(arg).mro():
                 try:
@@ -67,11 +67,11 @@ class Query(Named):
                 raise InvalidClauseError(arg.sql_name, self.sql_name)
 
         for key, arg in kwargs.items():
-            param_clauses[key] = param_cls[key](arg)
+            param_clauses[key] = param_cls[key].parse_native(arg)
 
-        if default_param_args:
+        if native_args:
             key, klass = self.default_param
-            param_clauses[key] = klass(*default_param_args)
+            param_clauses[key] = klass.parse_native(*native_args)
         return param_clauses
 
 

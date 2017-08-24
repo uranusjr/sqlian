@@ -1,8 +1,9 @@
-from .base import Named, Sql, ensure_sql, ensure_sql_args
-from .compositions import parse_native_as_value_list
+from .base import Named, Sql, ensure_sql
+from .compositions import List
 from .expressions import (
     Ref, parse_native_as_condition, parse_native_as_ref_list,
 )
+from .utils import is_non_string_sequence
 
 
 class Clause(Named):
@@ -33,9 +34,13 @@ class From(Clause):
 
 
 class Where(Clause):
-    @ensure_sql(parse_native_as_condition)
+
     def __init__(self, condition):
         super(Where, self).__init__(condition)
+
+    @classmethod
+    def parse_native(cls, value):
+        return cls(ensure_sql(value, parse_native_as_condition))
 
 
 class GroupBy(Clause):
@@ -57,14 +62,17 @@ class Offset(Clause):
 
 
 class InsertInto(Clause):
-    @ensure_sql(Ref)
+
     def __init__(self, table_ref):
         super(InsertInto, self).__init__(table_ref)
+
+    @classmethod
+    def parse_native(cls, value):
+        return cls(ensure_sql(value, Ref))
 
 
 class Columns(Clause):
 
-    @ensure_sql(parse_native_as_ref_list)
     def __init__(self, ref_list):
         super(Columns, self).__init__(ref_list)
         self.ref_list = ref_list
@@ -72,17 +80,31 @@ class Columns(Clause):
     def __sql__(self):
         return self.ref_list.__sql__()
 
+    @classmethod
+    def parse_native(cls, value):
+        return cls(ensure_sql(value, parse_native_as_ref_list))
+
 
 class Values(Clause):
-    @ensure_sql_args(parse_native_as_value_list, skip_first=True)
+
     def __init__(self, *children):
         super(Values, self).__init__(*children)
 
+    @classmethod
+    def parse_native(cls, values):
+        if any(not is_non_string_sequence(v) for v in values):
+            values = [values]
+        return cls(*(List(*v) for v in values))
+
 
 class Update(Clause):
-    @ensure_sql(Ref)
+
     def __init__(self, table_ref):
         super(Update, self).__init__(table_ref)
+
+    @classmethod
+    def parse_native(cls, value):
+        return cls(ensure_sql(value, Ref))
 
 
 class Set(Clause):
@@ -90,9 +112,13 @@ class Set(Clause):
 
 
 class DeleteFrom(Clause):
-    @ensure_sql(Ref)
+
     def __init__(self, table_ref):
         super(DeleteFrom, self).__init__(table_ref)
+
+    @classmethod
+    def parse_native(cls, value):
+        return cls(ensure_sql(value, Ref))
 
 
 class On(Clause):
