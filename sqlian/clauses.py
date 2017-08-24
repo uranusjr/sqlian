@@ -1,4 +1,5 @@
-from .base import Named, Sql
+from .base import Named, Sql, ensure_sql
+from .expressions import Ref, parse_native_as_condition
 
 
 class Clause(Named):
@@ -29,6 +30,7 @@ class From(Clause):
 
 
 class Where(Clause):
+    @ensure_sql(parse_native_as_condition)
     def __init__(self, condition):
         super(Where, self).__init__(condition)
 
@@ -68,6 +70,7 @@ class Values(Clause):
 
 
 class Update(Clause):
+    @ensure_sql(Ref)
     def __init__(self, table_ref):
         super(Update, self).__init__(table_ref)
         self.table_ref = table_ref
@@ -78,6 +81,7 @@ class Set(Clause):
 
 
 class DeleteFrom(Clause):
+    @ensure_sql(Ref)
     def __init__(self, table_ref):
         super(DeleteFrom, self).__init__(table_ref)
         self.table_ref = table_ref

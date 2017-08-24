@@ -21,9 +21,9 @@ class InvalidClauseError(QueryError):
 
 class Query(Named):
 
-    def __init__(self, *clauses):
+    def __init__(self, *args, **kwargs):
         super(Query, self).__init__()
-        self.param_clauses = self._map_clause_to_params(clauses)
+        self.param_clauses = self._map_clause_to_params(args, kwargs)
 
     def __repr__(self):
         return '{}({})'.format(
@@ -42,24 +42,36 @@ class Query(Named):
             if key in self.param_clauses
         )
 
-    def _map_clause_to_params(self, clauses):
+    def _map_clause_to_params(self, args, kwargs):
         param_clauses = {}
+        default_param_args = []
         cls_param = {klass: key for key, klass in self.param_classes}
-        for clause in clauses:
+        param_cls = {key: klass for key, klass in self.param_classes}
+
+        for arg in args:
             no_match = True
-            for klass in type(clause).mro():
+            if not hasattr(arg, '__sql__'):
+                default_param_args.append(arg)
+                continue
+            for klass in type(arg).mro():
                 try:
                     key = cls_param[klass]
                 except KeyError:
                     continue
                 if key in param_clauses:
-                    raise DuplicateClauseError(clause.sql_name, self.sql_name)
-                param_clauses[key] = clause
+                    raise DuplicateClauseError(arg.sql_name, self.sql_name)
+                param_clauses[key] = arg
                 no_match = False
                 break
-
             if no_match:
-                raise InvalidClauseError(clause.sql_name, self.sql_name)
+                raise InvalidClauseError(arg.sql_name, self.sql_name)
+
+        for key, arg in kwargs.items():
+            param_clauses[key] = param_cls[key](arg)
+
+        if default_param_args:
+            key, klass = self.default_param
+            param_clauses[key] = klass(*default_param_args)
         return param_clauses
 
 
@@ -95,3 +107,4 @@ class Delete(Query):
         ('delete', clauses.DeleteFrom),
         ('where', clauses.Where),
     ]
+    default_param = ('delete', clauses.DeleteFrom)

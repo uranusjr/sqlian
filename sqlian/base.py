@@ -33,11 +33,11 @@ class Sql(six.text_type):
     def __repr__(self):
         return 'Sql({})'.format(six.text_type.__repr__(self))
 
-    def __mod__(self, other):
-        return type(self)(super(Sql, self) % sql(other))
-
     def __sql__(self):
         return self
+
+    def __mod__(self, other):
+        return type(self)(super(Sql, self) % sql(other))
 
     def format(self, *args, **kwargs):
         args = (sql(a) for a in args)
@@ -48,7 +48,7 @@ class Sql(six.text_type):
         return type(self)(super(Sql, self).join(sql(i) for i in iterable))
 
 
-class UnescapedError(TypeError):
+class UnescapedError(ValueError):
     def __init__(self, v):
         super(UnescapedError, self).__init__('unescaped value {!r}'.format(v))
 
@@ -79,9 +79,35 @@ def class_name_to_sql_name(s):
 
 
 class Named(object):
+    """Mixin class providing SQL information via introspection.
+    """
     def __init__(self):
         self.type_name = type(self).__name__
         self.sql_name = Sql(getattr(
             type(self), 'sql_name',
             class_name_to_sql_name(self.type_name),
         ))
+
+
+def ensure_sql(*trans):
+    """Coerce arguments of decorated function to SQL components.
+    """
+    def decorator(f):
+
+        def ensure(arg, transform):
+            if transform is None or hasattr(arg, '__sql__'):
+                return arg
+            return transform(arg)
+
+        @functools.wraps(f)
+        def checked_f(*args):
+            return f(*(
+                ensure(arg, transform)
+                for arg, transform in zip(
+                    args, (None,) * (len(args) - len(trans)) + trans,
+                )
+            ))
+
+        return checked_f
+
+    return decorator

@@ -34,7 +34,7 @@ class List(Composition):
     def __new__(cls, *children):
         if len(children) == 1 and isinstance(children[0], cls):
             return children[0]  # Avoid wrapping a single List.
-        return object.__new__(cls)
+        return Composition.__new__(cls)
 
     def __init__(self, *children):
         self.children = list(children)

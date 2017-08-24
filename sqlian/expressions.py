@@ -1,4 +1,8 @@
-from .base import Sql, sql
+import collections
+import functools
+import inspect
+
+from .base import UnescapedError, Sql, sql
 from .utils import sql_format_identifier
 
 
@@ -33,6 +37,9 @@ class Ref(Expression):
         return Sql('.').join(
             Sql(sql_format_identifier(p)) for p in self.qualified_parts
         )
+
+    def __eq__(self, operand):
+        return Equal(self, operand)
 
 
 class Param(Expression):
@@ -112,3 +119,30 @@ class In(Infix):
 
 class And(Infix):
     operator = 'AND'
+
+
+@functools.lru_cache(maxsize=1)
+def get_condition_classes():
+    return {
+        value.operator: value for value in globals().values()
+        if inspect.isclass(value) and hasattr(value, 'operator')
+    }
+
+
+def parse_pair_as_condition(key, value):
+    condition_classes = get_condition_classes()
+    if isinstance(key, tuple):
+        key, op = key
+        return condition_classes[op](Ref(key), value)
+    for op, klass in condition_classes.items():
+        if key.endswith(' {}'.format(op)):
+            return klass(Ref(key[:-(len(op) + 1)]), value)
+    return Equal(Ref(key), value)
+
+
+def parse_native_as_condition(data):
+    if isinstance(data, collections.Mapping):
+        data = data.items()
+    elif not isinstance(data, collections.Sequence):
+        return sql(data)
+    return And(*(parse_pair_as_condition(key, value) for key, value in data))
