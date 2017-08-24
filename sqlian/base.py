@@ -56,6 +56,8 @@ def sql(obj):
     """
     if hasattr(obj, '__sql__'):
         return obj.__sql__()
+    if obj is None:
+        return Sql('NULL')
     if isinstance(obj, bool):
         return {True: Sql('TRUE'), False: Sql('FALSE')}[obj]
     if isinstance(obj, numbers.Number):

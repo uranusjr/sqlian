@@ -35,7 +35,7 @@ def test_select_where_in():
     query = q.Select(
         c.Select(e.star),
         c.From(e.Ref('person')),
-        c.Where(e.In(e.Ref('person_id'), ['andy', 'bob'])),
+        c.Where(e.In(e.Ref('person_id'), m.List('andy', 'bob'))),
     )
     assert sql(query) == """
         SELECT * FROM "person" WHERE "person_id" IN ('andy', 'bob')
@@ -63,7 +63,7 @@ def test_select_where_greater_than_like():
         )),
     )
     assert sql(query) == """
-        SELECT * FROM "person" WHERE ("age" > 20) AND ("name" LIKE 'Mosky%')
+        SELECT * FROM "person" WHERE "age" > 20 AND "name" LIKE 'Mosky%'
     """.strip()
 
 
@@ -76,7 +76,7 @@ def test_select_where_false():
     assert sql(query) == 'SELECT * FROM "person" WHERE FALSE'
 
 
-def test_select():
+def test_select_from():
     query = q.Select(
         c.Select(e.star),
         c.From(e.Ref('person')),
@@ -143,9 +143,9 @@ def test_select_param():
     )
     assert sql(query) == (
         'SELECT * FROM "table" '
-        'WHERE ("auto_param" = %(auto_param)s) '
-        'AND ("using_alias" = %(using_alias)s) '
-        'AND ("custom_param" = %(my_param)s)'
+        'WHERE "auto_param" = %(auto_param)s '
+        'AND "using_alias" = %(using_alias)s '
+        'AND "custom_param" = %(my_param)s'
     )
 
 

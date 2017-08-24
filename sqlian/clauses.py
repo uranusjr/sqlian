@@ -50,26 +50,26 @@ class Offset(Clause):
 
 class InsertInto(Clause):
 
-    def __init__(self, table_ref, *column_refs):
-        super(InsertInto, self).__init__(*column_refs)
+    def __init__(self, table_ref, column_ref=None):
+        super(InsertInto, self).__init__(table_ref, column_ref)
         self.table_ref = table_ref
-        self.column_refs = self.children
+        self.column_ref = column_ref
 
     def __repr__(self):
         return '<{} {!r} {!r}>'.format(
-            self.type_name, self.table_ref, self.children,
+            self.type_name, self.table_ref, self.column_ref,
         )
 
     def __sql__(self):
-        return Sql('{} {} ({})').format(
-            self.sql_name,
-            self.table_ref,
-            Sql(', ').join(self.column_refs),
+        if self.column_ref is None:
+            template = Sql('{sql_name} {table_ref}')
+        else:
+            template = Sql('{sql_name} {table_ref} {column_ref}')
+        return template.format(
+            sql_name=self.sql_name, table_ref=self.table_ref,
+            column_ref=self.column_ref,
         )
 
 
 class Values(Clause):
-    def __sql__(self):
-        return Sql('{} ({})').format(
-            self.sql_name, Sql(', ').join(self.children),
-        )
+    pass

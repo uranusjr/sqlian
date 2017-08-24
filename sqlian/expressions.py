@@ -107,21 +107,8 @@ class Like(Infix):
 
 
 class In(Infix):
-
     operator = 'IN'
-
-    def __sql__(self):
-        return Sql('{0} {op} ({1})').format(
-            self.operands[0], Sql(', ').join(self.operands[1]),
-            op=Sql(self.operator),
-        )
 
 
 class And(Infix):
-
     operator = 'AND'
-
-    def __sql__(self):
-        return Sql(' {} '.format(self.operator)).join(
-            Sql('({})').format(o) for o in self.operands,
-        )

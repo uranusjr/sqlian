@@ -4,7 +4,6 @@ from .base import Sql
 class As(object):
 
     def __init__(self, expression, alias):
-        super(As, self).__init__()
         self.expression = expression
         self.alias = alias
 
@@ -29,3 +28,15 @@ class Ordering(object):
 
     def __sql__(self):
         return Sql('{} {}').format(self.expression, self.order)
+
+
+class List(object):
+
+    def __init__(self, *children):
+        self.children = list(children)
+
+    def __repr__(self):
+        return '<Composition {!r}>'.format(self.children)
+
+    def __sql__(self):
+        return Sql('({})').format(Sql(', ').join(self.children))
