@@ -2,7 +2,8 @@ import collections
 import functools
 import inspect
 
-from .base import UnescapedError, Sql, sql
+from .base import Sql, sql
+from .compositions import List
 from .utils import sql_format_identifier
 
 
@@ -13,7 +14,7 @@ class Expression(object):
 class Star(Expression):
 
     def __repr__(self):
-        return '<Star>'
+        return 'Sql(*)'
 
     def __sql__(self):
         return Sql('*')
@@ -29,7 +30,7 @@ class Ref(Expression):
         self.qualified_parts = list(qualified_parts)
 
     def __repr__(self):
-        return '<Ref {}>'.format(
+        return 'Ref({})'.format(
             '.'.join(repr(p) for p in self.qualified_parts),
         )
 
@@ -146,3 +147,7 @@ def parse_native_as_condition(data):
     elif not isinstance(data, collections.Sequence):
         return sql(data)
     return And(*(parse_pair_as_condition(key, value) for key, value in data))
+
+
+def parse_native_as_ref_list(names):
+    return List(*(Ref(n) for n in names))

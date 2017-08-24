@@ -9,10 +9,8 @@ from sqlian import (
 
 def test_insert():
     query = q.Insert(
-        c.InsertInto(
-            e.Ref('person'),
-            m.List(e.Ref('person_id'), e.Ref('name')),
-        ),
+        c.InsertInto(e.Ref('person')),
+        c.Columns(m.List(e.Ref('person_id'), e.Ref('name'))),
         c.Values(m.List('mosky', 'Mosky Liu')),
     )
     assert sql(query) == (

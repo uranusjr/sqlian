@@ -1,5 +1,8 @@
-from .base import Named, Sql, ensure_sql
-from .expressions import Ref, parse_native_as_condition
+from .base import Named, Sql, ensure_sql, ensure_sql_args
+from .compositions import parse_native_as_value_list
+from .expressions import (
+    Ref, parse_native_as_condition, parse_native_as_ref_list,
+)
 
 
 class Clause(Named):
@@ -54,26 +57,32 @@ class Offset(Clause):
 
 
 class InsertInto(Clause):
+    @ensure_sql(Ref)
+    def __init__(self, table_ref):
+        super(InsertInto, self).__init__(table_ref)
 
-    def __init__(self, table_ref, column_ref=None):
-        args = (table_ref,) if column_ref is None else (table_ref, column_ref,)
-        super(InsertInto, self).__init__(*args)
-        self.table_ref = table_ref
-        self.column_ref = column_ref
+
+class Columns(Clause):
+
+    @ensure_sql(parse_native_as_ref_list)
+    def __init__(self, ref_list):
+        super(Columns, self).__init__(ref_list)
+        self.ref_list = ref_list
 
     def __sql__(self):
-        return Sql(' ').join([self.sql_name] + self.children)
+        return self.ref_list.__sql__()
 
 
 class Values(Clause):
-    pass
+    @ensure_sql_args(parse_native_as_value_list, skip_first=True)
+    def __init__(self, *children):
+        super(Values, self).__init__(*children)
 
 
 class Update(Clause):
     @ensure_sql(Ref)
     def __init__(self, table_ref):
         super(Update, self).__init__(table_ref)
-        self.table_ref = table_ref
 
 
 class Set(Clause):
@@ -84,7 +93,6 @@ class DeleteFrom(Clause):
     @ensure_sql(Ref)
     def __init__(self, table_ref):
         super(DeleteFrom, self).__init__(table_ref)
-        self.table_ref = table_ref
 
 
 class On(Clause):

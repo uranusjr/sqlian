@@ -90,8 +90,10 @@ class Select(Query):
 class Insert(Query):
     param_classes = [
         ('insert', clauses.InsertInto),
+        ('columns', clauses.Columns),
         ('values', clauses.Values),
     ]
+    default_param = ('insert', clauses.InsertInto)
 
 
 class Update(Query):

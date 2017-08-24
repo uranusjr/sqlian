@@ -10,7 +10,7 @@ class Function(Named, Expression):
 
     def __repr__(self):
         return '{}({})'.format(
-            self.name, ', '.join(repr(a) for a in self.args),
+            self.type_name, ', '.join(repr(a) for a in self.args),
         )
 
     def __sql__(self):

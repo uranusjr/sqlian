@@ -1,14 +1,23 @@
-from .base import Named, Sql, sql
+from .base import Named, Sql
 
 
 class Composition(object):
+
+    def __init__(self, *args):
+        super(Composition, self).__init__()
+        self.args = args
+
     def __repr__(self):
-        return 'Composition({!r})'.format(str(sql(self)))
+        return '{}({!r})'.format(
+            type(self).__name__,
+            ', '.join(repr(a) for a in self.args),
+        )
 
 
 class As(Composition):
 
     def __init__(self, expression, alias):
+        super(As, self).__init__(expression, alias)
         self.expression = expression
         self.alias = alias
 
@@ -19,6 +28,7 @@ class As(Composition):
 class Ordering(Composition):
 
     def __init__(self, expression, order):
+        super(Ordering, self).__init__(expression, order)
         order = Sql(order.upper())
         if order not in ['ASC', 'DESC']:
             raise ValueError('unsupported ordering {!r}'.format(order))
@@ -37,6 +47,7 @@ class List(Composition):
         return Composition.__new__(cls)
 
     def __init__(self, *children):
+        super(List, self).__init__(*children)
         self.children = list(children)
 
     def __sql__(self):
@@ -46,6 +57,7 @@ class List(Composition):
 class Assign(Composition):
 
     def __init__(self, ref, value):
+        super(Assign, self).__init__(ref, value)
         self.ref = ref
         self.value = value
 
@@ -76,10 +88,10 @@ ALLOWED_JOIN_TYPES = {
 }
 
 
-class Join(Named, Composition):
+class Join(Composition, Named):
 
     def __init__(self, item, join_type, join_item, on_using=None):
-        super(Join, self).__init__()
+        super(Join, self).__init__(item, join_type, join_item, on_using)
         join_type = Sql(join_type.upper())
         if join_type not in ALLOWED_JOIN_TYPES:
             raise ValueError('unsupported join type {!r}'.format(join_type))
@@ -93,3 +105,7 @@ class Join(Named, Composition):
         if self.on_using is not None:
             parts.append(self.on_using)
         return Sql(' ').join(parts)
+
+
+def parse_native_as_value_list(values):
+    return List(*values)

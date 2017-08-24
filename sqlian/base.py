@@ -48,9 +48,11 @@ class Sql(six.text_type):
         return type(self)(super(Sql, self).join(sql(i) for i in iterable))
 
 
-class UnescapedError(ValueError):
+class UnescapableError(ValueError):
     def __init__(self, v):
-        super(UnescapedError, self).__init__('unescaped value {!r}'.format(v))
+        super(UnescapableError, self).__init__(
+            '{} value {!r} cannot be escaped'.format(type(v).__name__, v),
+        )
 
 
 @assert_safe
@@ -69,7 +71,7 @@ def sql(obj):
         obj = obj.decode('utf-8')
     if isinstance(obj, six.text_type):
         return Sql(utils.sql_format_string_literal(obj))
-    raise UnescapedError(obj)
+    raise UnescapableError(obj)
 
 
 def class_name_to_sql_name(s):
@@ -107,6 +109,28 @@ def ensure_sql(*trans):
                     args, (None,) * (len(args) - len(trans)) + trans,
                 )
             ))
+
+        return checked_f
+
+    return decorator
+
+
+def ensure_sql_args(transform, skip_first=False):
+    """Coerce all arguments of decorated function to SQL components.
+    """
+    def decorator(f):
+
+        def ensure(arg):
+            if hasattr(arg, '__sql__'):
+                return arg
+            return transform(arg)
+
+        @functools.wraps(f)
+        def checked_f(*args):
+            if skip_first:
+                return f(args[0], *(ensure(arg) for arg in args[1:]))
+            else:
+                return f(*(ensure(arg) for arg in args))
 
         return checked_f
 

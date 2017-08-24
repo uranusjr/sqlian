@@ -1,5 +1,5 @@
 from . import clauses, compositions, expressions, functions, queries
-from .base import Named, Sql, UnescapedError, sql
+from .base import Named, Sql, UnescapableError, sql
 from .expressions import Ref
 from .utils import sql_format_identifier, sql_format_string_literal
 
@@ -10,7 +10,7 @@ __all__ = [
 
     # Base components.
     'Sql', 'sql',
-    'Named', 'UnescapedError',
+    'Named', 'UnescapableError',
 
     # Expressions.
     'Ref',
