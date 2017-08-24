@@ -1,5 +1,8 @@
 def sql_format_string_literal(value):
-    # TODO: Escape special characters.
+    # SQL standard: replace single quotes with pairs of them.
+    value = value.replace("'", "''")
+    if '\0' in value:   # TODO: Is there a good way to handle this?
+        raise ValueError('null character in string')
     return "'{}'".format(value)
 
 

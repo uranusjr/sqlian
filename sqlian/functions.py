@@ -9,7 +9,7 @@ class Function(Named, Expression):
         self.args = args
 
     def __repr__(self):
-        return '<{}({})>'.format(
+        return '{}({})'.format(
             self.name, ', '.join(repr(a) for a in self.args),
         )
 

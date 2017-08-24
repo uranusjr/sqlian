@@ -26,9 +26,9 @@ class Query(Named):
         self.param_clauses = self._map_clause_to_params(clauses)
 
     def __repr__(self):
-        return '<{} {}>'.format(
-            self.sql_name,
-            ' '.join(
+        return '{}({})'.format(
+            self.type_name,
+            ', '.join(
                 repr(self.param_clauses[key])
                 for key, _ in self.param_classes
                 if key in self.param_clauses
@@ -79,4 +79,19 @@ class Insert(Query):
     param_classes = [
         ('insert', clauses.InsertInto),
         ('values', clauses.Values),
+    ]
+
+
+class Update(Query):
+    param_classes = [
+        ('update', clauses.Update),
+        ('set_', clauses.Set),
+        ('where', clauses.Where),
+    ]
+
+
+class Delete(Query):
+    param_classes = [
+        ('delete', clauses.DeleteFrom),
+        ('where', clauses.Where),
     ]

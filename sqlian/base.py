@@ -10,16 +10,31 @@ from . import utils
 CAMEL_RE = re.compile(r'([a-z])([A-Z])')
 
 
+def assert_safe(f):
+    """Make sure the decorated function returns an SQL object.
+    """
+    @functools.wraps(f)
+    def safe_f(*args, **kwargs):
+        v = f(*args, **kwargs)
+        assert isinstance(v, Sql)
+        return v
+
+    return f
+
+
 class Sql(six.text_type):
     """A SQL string.
     """
     def __new__(cls, base=u'', *args, **kwargs):
         if hasattr(base, '__sql__'):
-            base = base.__sql__()
+            base = assert_safe(base.__sql__)()
         return six.text_type.__new__(cls, base, *args, **kwargs)
 
     def __repr__(self):
-        return 'Sql({})'.format(str.__repr__(self))
+        return 'Sql({})'.format(six.text_type.__repr__(self))
+
+    def __mod__(self, other):
+        return type(self)(super(Sql, self) % sql(other))
 
     def __sql__(self):
         return self
@@ -36,18 +51,6 @@ class Sql(six.text_type):
 class UnescapedError(TypeError):
     def __init__(self, v):
         super(UnescapedError, self).__init__('unescaped value {!r}'.format(v))
-
-
-def assert_safe(f):
-    """Make sure the decorated function returns an SQL object.
-    """
-    @functools.wraps(f)
-    def safe_f(*args, **kwargs):
-        v = f(*args, **kwargs)
-        assert isinstance(v, Sql)
-        return v
-
-    return f
 
 
 @assert_safe

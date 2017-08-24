@@ -156,3 +156,62 @@ def test_select_count():
         c.GroupBy(e.Ref('age')),
     )
     assert sql(query) == 'SELECT COUNT(*) FROM "person" GROUP BY "age"'
+
+
+def test_select_join_natural():
+    query = q.Select(
+        c.Select(e.star),
+        c.From(m.Join(e.Ref('person'), 'NATURAL', e.Ref('detail'))),
+    )
+    assert sql(query) == 'SELECT * FROM "person" NATURAL JOIN "detail"'
+
+
+def test_select_join_inner_on():
+    query = q.Select(
+        c.Select(e.star),
+        c.From(m.Join(
+            e.Ref('person'), 'INNER', e.Ref('detail'),
+            c.On(e.Equal(
+                e.Ref('person', 'person_id'),
+                e.Ref('detail', 'person_id'),
+            )),
+        )),
+    )
+    assert sql(query) == (
+        'SELECT * FROM "person" '
+        'INNER JOIN "detail" ON "person"."person_id" = "detail"."person_id"'
+    )
+
+
+def test_select_join_left_using():
+    query = q.Select(
+        c.Select(e.star),
+        c.From(m.Join(
+            e.Ref('person'), 'LEFT', e.Ref('detail'),
+            c.Using(m.List(e.Ref('person_id'))),
+        )),
+    )
+    assert sql(query) == """
+        SELECT * FROM "person" LEFT JOIN "detail" USING ("person_id")
+    """.strip()
+
+
+def test_select_join_cross():
+    query = q.Select(
+        c.Select(e.star),
+        c.From(m.Join(e.Ref('person'), 'CROSS', e.Ref('detail'))),
+    )
+    assert sql(query) == 'SELECT * FROM "person" CROSS JOIN "detail"'
+
+
+def test_select_join_right_using():
+    query = q.Select(
+        c.Select(e.star),
+        c.From(m.Join(
+            e.Ref('person'), 'RIGHT', e.Ref('detail'),
+            c.Using(m.List(e.Ref('person_id'))),
+        )),
+    )
+    assert sql(query) == """
+        SELECT * FROM "person" RIGHT JOIN "detail" USING ("person_id")
+    """.strip()

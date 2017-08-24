@@ -55,7 +55,7 @@ class Condition(Expression):
         self.operands = ps
 
     def __repr__(self):
-        return '<Condition {!r}>'.format(str(sql(self)))
+        return 'Condition({!r})'.format(str(sql(self)))
 
 
 class Suffix(Condition):

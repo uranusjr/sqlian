@@ -3,6 +3,7 @@ import pytest
 from sqlian import (
     sql,
     clauses as c,
+    compositions as m,
     expressions as e,
     functions as f,
     queries as q,
@@ -29,4 +30,19 @@ def test_select_locking():
     assert sql(query) == (
         'SELECT * FROM "person" WHERE "person_id" = 1 '
         'FOR UPDATE OF "person" NOWAIT'
+    )
+
+
+def test_insert_returning():
+    query = q.Insert(
+        c.InsertInto(
+            c.Ref('person'),
+            m.List(c.Ref('person_id'), c.Ref('name')),
+        ),
+        c.Values('mosky', 'Mosky Liu'),
+        c.Returning(e.star),
+    )
+    assert sql(query) == (
+        'INSERT INTO "person" ("person_id", "name") '
+        "VALUES ('mosky', 'Mosky Liu') RETURNING *"
     )
