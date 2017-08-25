@@ -38,3 +38,8 @@ def test_insert_values_multiple():
         'INSERT INTO "person" '
         "VALUES ('mosky', 'Mosky Liu'), ('yiyu', 'Yi-Yu Liu')"
     )
+
+
+def test_insert_no_values():
+    query = q.Insert(c.InsertInto(e.Ref('person')), c.Values(m.List()))
+    assert sql(query) == """INSERT INTO "person" VALUES ()"""

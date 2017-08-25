@@ -21,3 +21,10 @@ def is_non_string_sequence(s):
         isinstance(s, collections.Sequence) and
         not isinstance(s, six.string_types)
     )
+
+
+def is_single_row(iterable):
+    return (
+        getattr(iterable, '__single_row__', False) or
+        any(not is_non_string_sequence(v) for v in iterable)
+    )

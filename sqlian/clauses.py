@@ -3,7 +3,7 @@ from .compositions import List
 from .expressions import (
     Ref, parse_native_as_condition, parse_native_as_ref_list,
 )
-from .utils import is_non_string_sequence
+from .utils import is_single_row
 
 
 class Clause(Named):
@@ -92,7 +92,9 @@ class Values(Clause):
 
     @classmethod
     def parse_native(cls, values):
-        if any(not is_non_string_sequence(v) for v in values):
+        if not values:
+            return cls(List())
+        if is_single_row(values):
             values = [values]
         return cls(*(List(*v) for v in values))
 

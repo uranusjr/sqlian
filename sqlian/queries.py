@@ -1,3 +1,5 @@
+import collections
+
 from . import clauses
 from .base import Named, Sql
 
@@ -88,12 +90,31 @@ class Select(Query):
 
 
 class Insert(Query):
+
     param_classes = [
         ('insert', clauses.InsertInto),
         ('columns', clauses.Columns),
         ('values', clauses.Values),
     ]
     default_param = ('insert', clauses.InsertInto)
+
+    def __init__(self, *args, **kwargs):
+        # Unpack mapping 'values' kwarg into 'columns' and 'values' kwargs.
+        # This only happens if the 'columns' kwarg is not already set.
+        values_kwarg = kwargs.get('values')
+        if ('columns' not in kwargs and
+                isinstance(values_kwarg, collections.Mapping)):
+            # Wrap the values interable and set ax explicit marker to indicate
+            # it is a single row, to disable the auto-parsing functionality
+            # allowing you to pass either a single row as list, or multiple
+            # rows as list of lists into the 'values' kwarg.
+            single_row_values = collections.UserList(values_kwarg.values())
+            single_row_values.__single_row__ = True
+            kwargs.update({
+                'columns': values_kwarg.keys(),
+                'values': single_row_values,
+            })
+        super(Insert, self).__init__(*args, **kwargs)
 
 
 class Update(Query):
