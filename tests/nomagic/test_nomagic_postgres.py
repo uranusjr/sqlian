@@ -10,7 +10,7 @@ from sqlian import (
 )
 
 
-pytestmark = pytest.mark.skip('PostgreSQL backend not yet implemented')
+pytestmark = pytest.mark.xfail(reason='PostgreSQL backend not yet implemented')
 
 
 def test_select_locking():

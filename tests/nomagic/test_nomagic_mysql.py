@@ -10,7 +10,7 @@ from sqlian import (
 )
 
 
-pytestmark = pytest.mark.skip('MySQL backend not yet implemented')
+pytestmark = pytest.mark.xfail(reason='MySQL backend not yet implemented')
 
 
 def test_select_for_update():
