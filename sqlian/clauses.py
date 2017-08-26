@@ -3,7 +3,7 @@ import collections
 from .base import Named, Parsable, Sql, Value
 from .compositions import Assign, List
 from .expressions import And, Equal, Ref, get_condition_classes
-from .utils import is_single_row
+from .utils import is_non_string_sequence, is_single_row
 
 
 class Clause(Named, Parsable):
@@ -43,10 +43,14 @@ class TableClause(Clause):
 
 
 class Select(Clause):
-    pass
+    @classmethod
+    def parse(cls, value):
+        if is_non_string_sequence(value):
+            return cls(*(Ref.parse(v) for v in value))
+        return cls(Ref.parse(value))
 
 
-class From(Clause):
+class From(TableClause):
     pass
 
 

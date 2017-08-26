@@ -95,6 +95,7 @@ class Select(Query):
         ('limit', clauses.Limit),
         ('offset', clauses.Offset),
     ]
+    default_param = ('select', clauses.Select)
 
 
 class Insert(Query):
