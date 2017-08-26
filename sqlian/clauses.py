@@ -143,7 +143,7 @@ def parse_pair_as_condition(key, value):
     for op, klass in condition_classes.items():
         if key.endswith(' {}'.format(op)):
             return klass(Ref(key[:-(len(op) + 1)]), value)
-    return Equal(Ref(key), value)
+    return Equal(ensure_sql(key, Ref), value)
 
 
 def parse_native_as_condition(data):
