@@ -24,6 +24,8 @@ class InvalidClauseError(QueryError):
 
 class Query(Named):
 
+    param_aliases = ()
+
     def __init__(self, *args, **kwargs):
         super(Query, self).__init__()
         self.param_clauses = self._map_clause_to_params(args, kwargs)
@@ -70,6 +72,8 @@ class Query(Named):
                 raise InvalidClauseError(arg.sql_name, self.sql_name)
 
         for key, arg in kwargs.items():
+            if key in self.param_aliases:
+                key = self.param_aliases[key]
             param_clauses[key] = param_cls[key].parse_native(arg)
 
         if native_args:
@@ -124,9 +128,11 @@ class Insert(Query):
 class Update(Query):
     param_classes = [
         ('update', clauses.Update),
-        ('set_', clauses.Set),
+        ('set', clauses.Set),
         ('where', clauses.Where),
     ]
+    default_param = ('update', clauses.Update)
+    param_aliases = {'set_': 'set'}
 
 
 class Delete(Query):

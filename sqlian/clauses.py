@@ -1,7 +1,7 @@
 import collections
 
 from .base import Named, Sql, ensure_sql, sql
-from .compositions import List
+from .compositions import Assign, List
 from .expressions import And, Equal, Ref, get_condition_classes
 from .utils import is_single_row
 
@@ -23,6 +23,16 @@ class Clause(Named):
             self.sql_name,
             Sql(', ').join(self.children),
         )
+
+
+class TableClause(Clause):
+
+    def __init__(self, ref):
+        super(TableClause, self).__init__(ref)
+
+    @classmethod
+    def parse_native(cls, value):
+        return cls(ensure_sql(value, Ref))
 
 
 class Select(Clause):
@@ -61,14 +71,8 @@ class Offset(Clause):
         super(Offset, self).__init__(value)
 
 
-class InsertInto(Clause):
-
-    def __init__(self, table_ref):
-        super(InsertInto, self).__init__(table_ref)
-
-    @classmethod
-    def parse_native(cls, value):
-        return cls(ensure_sql(value, Ref))
+class InsertInto(TableClause):
+    pass
 
 
 class Columns(Clause):
@@ -99,28 +103,25 @@ class Values(Clause):
         return cls(*(List(*v) for v in values))
 
 
-class Update(Clause):
-
-    def __init__(self, table_ref):
-        super(Update, self).__init__(table_ref)
-
-    @classmethod
-    def parse_native(cls, value):
-        return cls(ensure_sql(value, Ref))
-
-
-class Set(Clause):
+class Update(TableClause):
     pass
 
 
-class DeleteFrom(Clause):
-
-    def __init__(self, table_ref):
-        super(DeleteFrom, self).__init__(table_ref)
-
+class Set(Clause):
     @classmethod
-    def parse_native(cls, value):
-        return cls(ensure_sql(value, Ref))
+    def parse_native(cls, values):
+        if isinstance(values, collections.Mapping):
+            values = values.items()
+        elif not isinstance(values, collections.Sequence):
+            return cls(values)
+        return cls(*(
+            Assign(ensure_sql(key, Ref), value)
+            for key, value in values
+        ))
+
+
+class DeleteFrom(TableClause):
+    pass
 
 
 class On(Clause):
