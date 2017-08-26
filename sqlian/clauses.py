@@ -60,7 +60,7 @@ def parse_pair_as_condition(key, value):
         key, op = key
         return condition_classes[op](Ref.parse(key), Value.parse(value))
     for op, klass in condition_classes.items():
-        if key.endswith(' {}'.format(op)):
+        if key.upper().endswith(' {}'.format(op)):
             return klass(Ref.parse(key[:-(len(op) + 1)]), Value.parse(value))
     return Equal(Ref.parse(key), Value.parse(value))
 
