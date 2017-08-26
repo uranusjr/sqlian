@@ -2,6 +2,7 @@ import collections
 
 from . import clauses
 from .base import Named, Sql
+from .expressions import star
 from .utils import NativeRow, is_values_mapping_sequence
 
 
@@ -86,6 +87,7 @@ class Query(Named):
 
 
 class Select(Query):
+
     param_classes = [
         ('select', clauses.Select),
         ('from_', clauses.From),
@@ -96,6 +98,11 @@ class Select(Query):
         ('offset', clauses.Offset),
     ]
     default_param = ('select', clauses.Select)
+
+    def __init__(self, *args, **kwargs):
+        if not args and 'select' not in kwargs:
+            kwargs['select'] = star
+        return super(Select, self).__init__(*args, **kwargs)
 
 
 class Insert(Query):
