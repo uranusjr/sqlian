@@ -1,18 +1,12 @@
 import collections
 
-from .base import Named, Sql, sql
+from .base import Named, Parsable, Sql, Value
 from .compositions import Assign, List
 from .expressions import And, Equal, Ref, get_condition_classes
 from .utils import is_single_row
 
 
-def ensure_sql(value, transform):
-    """Ensure value is a SQL component.
-    """
-    return value if hasattr(value, '__sql__') else transform(value)
-
-
-class Clause(Named):
+class Clause(Named, Parsable):
 
     def __init__(self, *children):
         super(Clause, self).__init__()
@@ -30,6 +24,13 @@ class Clause(Named):
             Sql(', ').join(self.children),
         )
 
+    @classmethod
+    def parse(cls, value):
+        parsed = super(Clause, cls).parse(value)
+        if isinstance(parsed, Clause):
+            return parsed
+        return cls(parsed)
+
 
 class TableClause(Clause):
 
@@ -37,8 +38,8 @@ class TableClause(Clause):
         super(TableClause, self).__init__(ref)
 
     @classmethod
-    def parse_native(cls, value):
-        return cls(ensure_sql(value, Ref))
+    def parse(cls, value):
+        return cls(Ref.parse(value))
 
 
 class Select(Clause):
@@ -49,6 +50,25 @@ class From(Clause):
     pass
 
 
+def parse_pair_as_condition(key, value):
+    condition_classes = get_condition_classes()
+    if isinstance(key, tuple):
+        key, op = key
+        return condition_classes[op](Ref.parse(key), Value.parse(value))
+    for op, klass in condition_classes.items():
+        if key.endswith(' {}'.format(op)):
+            return klass(Ref.parse(key[:-(len(op) + 1)]), Value.parse(value))
+    return Equal(Ref.parse(key), Value.parse(value))
+
+
+def parse_native_as_condition(data):
+    if isinstance(data, collections.Mapping):
+        data = data.items()
+    elif not isinstance(data, collections.Sequence):
+        return Value.parse(data)
+    return And(*(parse_pair_as_condition(key, value) for key, value in data))
+
+
 class Where(Clause):
 
     def __init__(self, condition):
@@ -56,7 +76,7 @@ class Where(Clause):
 
     @classmethod
     def parse_native(cls, value):
-        return cls(ensure_sql(value, parse_native_as_condition))
+        return cls(parse_native_as_condition(value))
 
 
 class GroupBy(Clause):
@@ -92,7 +112,7 @@ class Columns(Clause):
 
     @classmethod
     def parse_native(cls, value):
-        return cls(ensure_sql(value, parse_native_as_ref_list))
+        return cls(List(*(Ref.parse(n) for n in value)))
 
 
 class Values(Clause):
@@ -101,12 +121,15 @@ class Values(Clause):
         super(Values, self).__init__(*children)
 
     @classmethod
-    def parse_native(cls, values):
-        if not values:
+    def parse_native(cls, value):
+        if not value:
             return cls(List())
-        if is_single_row(values):
-            values = [values]
-        return cls(*(List(*v) for v in values))
+        if is_single_row(value):
+            value = [value]
+        return cls(*(
+            List(*(Value.parse(v) for v in row))
+            for row in value
+        ))
 
 
 class Update(TableClause):
@@ -115,14 +138,14 @@ class Update(TableClause):
 
 class Set(Clause):
     @classmethod
-    def parse_native(cls, values):
-        if isinstance(values, collections.Mapping):
-            values = values.items()
-        elif not isinstance(values, collections.Sequence):
-            return cls(values)
+    def parse_native(cls, value):
+        if isinstance(value, collections.Mapping):
+            value = value.items()
+        elif not isinstance(value, collections.Sequence):
+            return cls(Value.parse(value))
         return cls(*(
-            Assign(ensure_sql(key, Ref), value)
-            for key, value in values
+            Assign(Ref.parse(k), Value.parse(v))
+            for k, v in value
         ))
 
 
@@ -138,28 +161,3 @@ class On(Clause):
 class Using(Clause):
     def __init__(self, using_list):
         super(Using, self).__init__(using_list)
-
-
-# Native construct parsers.
-
-def parse_pair_as_condition(key, value):
-    condition_classes = get_condition_classes()
-    if isinstance(key, tuple):
-        key, op = key
-        return condition_classes[op](Ref(key), value)
-    for op, klass in condition_classes.items():
-        if key.endswith(' {}'.format(op)):
-            return klass(Ref(key[:-(len(op) + 1)]), value)
-    return Equal(ensure_sql(key, Ref), value)
-
-
-def parse_native_as_condition(data):
-    if isinstance(data, collections.Mapping):
-        data = data.items()
-    elif not isinstance(data, collections.Sequence):
-        return sql(data)
-    return And(*(parse_pair_as_condition(key, value) for key, value in data))
-
-
-def parse_native_as_ref_list(names):
-    return List(*(Ref(n) for n in names))

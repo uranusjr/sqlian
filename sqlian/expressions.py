@@ -1,15 +1,11 @@
 import functools
 import inspect
 
-from .base import Sql, sql
+from .base import Parsable, Sql, Value
 from .utils import sql_format_identifier
 
 
-class Expression(object):
-    pass
-
-
-class Star(Expression):
+class Star(object):
 
     def __repr__(self):
         return 'Sql(*)'
@@ -19,6 +15,10 @@ class Star(Expression):
 
 
 star = Star()
+
+
+class Expression(Parsable):
+    pass
 
 
 class Ref(Expression):
@@ -38,7 +38,11 @@ class Ref(Expression):
         )
 
     def __eq__(self, operand):
-        return Equal(self, operand)
+        return Equal(self, Value.parse(operand))
+
+    @classmethod
+    def parse_native(cls, value):
+        return cls(*value.split('.'))
 
 
 class Param(Expression):
@@ -61,7 +65,10 @@ class Condition(Expression):
         self.operands = ps
 
     def __repr__(self):
-        return 'Condition({!r})'.format(str(sql(self)))
+        return '{}({})'.format(
+            type(self),
+            ', '.join(repr(o) for o in self.operands),
+        )
 
 
 class Suffix(Condition):

@@ -74,11 +74,14 @@ class Query(Named):
         for key, arg in kwargs.items():
             if key in self.param_aliases:
                 key = self.param_aliases[key]
-            param_clauses[key] = param_cls[key].parse_native(arg)
+            param_clauses[key] = param_cls[key].parse(arg)
 
         if native_args:
             key, klass = self.default_param
-            param_clauses[key] = klass.parse_native(*native_args)
+            if len(native_args) == 1:
+                param_clauses[key] = klass.parse(native_args[0])
+            else:
+                param_clauses[key] = klass.parse(native_args)
         return param_clauses
 
 

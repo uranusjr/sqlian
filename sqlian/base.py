@@ -1,25 +1,10 @@
-import functools
+import collections
 import numbers
 import re
 
 import six
 
 from . import utils
-
-
-CAMEL_RE = re.compile(r'([a-z])([A-Z])')
-
-
-def assert_sql(f):
-    """Make sure the decorated function returns an SQL object.
-    """
-    @functools.wraps(f)
-    def safe_f(*args, **kwargs):
-        v = f(*args, **kwargs)
-        assert isinstance(v, Sql)
-        return v
-
-    return f
 
 
 class Sql(six.text_type):
@@ -37,15 +22,23 @@ class Sql(six.text_type):
         return self
 
     def __mod__(self, other):
-        return type(self)(super(Sql, self) % sql(other))
+        if isinstance(other, collections.Mapping):
+            other = {k: Value.parse(v).__sql__() for k, v in other.items()}
+        elif isinstance(other, collections.Sequence):
+            other = (Value.parse(v).__sql__() for v in other)
+        else:
+            other = Value.parse(other).__sql__()
+        return type(self)(super(Sql, self) % other)
 
     def format(self, *args, **kwargs):
-        args = (sql(a) for a in args)
-        kwargs = {k: sql(v) for k, v in kwargs.items()}
+        args = (Value.parse(a).__sql__() for a in args)
+        kwargs = {k: Value.parse(v).__sql__() for k, v in kwargs.items()}
         return type(self)(super(Sql, self).format(*args, **kwargs))
 
     def join(self, iterable):
-        return type(self)(super(Sql, self).join(sql(i) for i in iterable))
+        return type(self)(super(Sql, self).join(
+            Value.parse(i).__sql__() for i in iterable
+        ))
 
 
 class UnescapableError(ValueError):
@@ -55,11 +48,7 @@ class UnescapableError(ValueError):
         )
 
 
-@assert_sql
-def sql(obj):
-    if hasattr(obj, '__sql__'):
-        return obj.__sql__()
-    raise UnescapableError(obj)
+CAMEL_RE = re.compile(r'([a-z])([A-Z])')
 
 
 def class_name_to_sql_name(s):
@@ -79,7 +68,32 @@ class Named(object):
         ))
 
 
-class Value(object):
+class Parsable(object):
+    """Mixin giving a class ability to handle native data.
+    """
+    @classmethod
+    def parse_native(cls, value):
+        """Provide basic handling for native value.
+
+        The default implementation just wraps the value inside the class. You
+        should generally override this method to provide better parsing, but
+        almost never needs to call this (use ``parse()`` instead).
+        """
+        return cls(value)
+
+    @classmethod
+    def parse(cls, value):
+        """Smart parsing interface.
+
+        This pass native data to parse_native, and returns SQL constructs
+        immediately to prevent re-parsing.
+        """
+        if hasattr(value, '__sql__'):
+            return value
+        return cls.parse_native(value)
+
+
+class Value(Parsable):
 
     __slots__ = ('wrapped',)
 

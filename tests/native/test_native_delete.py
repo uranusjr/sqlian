@@ -1,11 +1,8 @@
-from sqlian import (
-    delete,
-    expressions as e,
-)
+from sqlian import Ref, delete
 
 
 def test_delete():
-    query = delete('person', where=(e.Ref('person_id') == 'mosky'))
+    query = delete('person', where=(Ref('person_id') == 'mosky'))
     assert query == """
         DELETE FROM "person" WHERE "person_id" = 'mosky'
     """.strip()
