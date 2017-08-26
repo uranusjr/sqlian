@@ -39,3 +39,25 @@ def test_select_where_is_null():
     assert query == """
         SELECT * FROM "person" WHERE "name" IS NULL
     """.strip()
+
+
+def test_select_where_greater_than_like():
+    query = select(from_='person', where={'age >': 20, 'name LIKE': 'Mosky%'})
+    assert query == """
+        SELECT * FROM "person" WHERE "age" > 20 AND "name" LIKE 'Mosky%'
+    """.strip()
+
+
+def test_select_where_false():
+    query = select(from_='person', where=False)
+    assert query == 'SELECT * FROM "person" WHERE FALSE'
+
+
+def test_select_from():
+    query = select(from_='person')
+    assert query == 'SELECT * FROM "person"'
+
+
+def test_select_constant():
+    query = select(1)
+    assert query == 'SELECT 1'

@@ -1,5 +1,7 @@
 import collections
 
+import six
+
 from .base import Named, Parsable, Sql
 from .compositions import Assign, List
 from .expressions import (
@@ -50,6 +52,8 @@ class Select(Clause):
     def parse(cls, value):
         if is_non_string_sequence(value):
             return cls(*(Ref.parse(v) for v in value))
+        if not isinstance(value, six.string_types):
+            return cls(Value.parse(value))
         return cls(Ref.parse(value))
 
 
