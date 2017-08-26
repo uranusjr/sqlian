@@ -66,6 +66,8 @@ def parse_native_as_condition(data):
         data = data.items()
     elif not isinstance(data, collections.Sequence):
         return Value.parse(data)
+    if is_single_row(data) and len(data) == 2:
+        return parse_pair_as_condition(*data)
     return And(*(parse_pair_as_condition(key, value) for key, value in data))
 
 
@@ -143,6 +145,9 @@ class Set(Clause):
             value = value.items()
         elif not isinstance(value, collections.Sequence):
             return cls(Value.parse(value))
+        if is_single_row(value) and len(value) == 2:
+            k, v = value
+            return cls(Assign(Ref.parse(k), Value.parse(v)))
         return cls(*(
             Assign(Ref.parse(k), Value.parse(v))
             for k, v in value

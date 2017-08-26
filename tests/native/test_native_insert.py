@@ -52,11 +52,11 @@ def test_insert_dict_multiple():
     )
 
 
-def test_insert_no_values():
+def test_insert_empty_values():
     query = insert('person', values=())
     assert query == """INSERT INTO "person" VALUES ()"""
 
 
-def test_insert_no_values_multiple():
+def test_insert_empty_values_multiple():
     query = insert('person', values=[(), (), ()])
     assert query == """INSERT INTO "person" VALUES (), (), ()"""
