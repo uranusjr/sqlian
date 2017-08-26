@@ -1,9 +1,9 @@
-from . import clauses, compositions, expressions, functions, queries
+from . import clauses, compositions, expressions, functions, queries, values
 from .base import Named, Sql, UnescapableError
 from .expressions import Ref
 from .sql import sql, select, insert, update, delete
 from .utils import sql_format_identifier, sql_format_string_literal
-from .values import star
+from .values import Value, star
 
 
 __all__ = [
@@ -13,17 +13,14 @@ __all__ = [
     # Base components.
     'Sql', 'Named', 'UnescapableError',
 
-    # Constants.
-    'star',
-
-    # Expressions.
-    'Ref',
+    # Expose some expressions.
+    'Ref', 'Value', 'star',
 
     # Utilities.
     'sql_format_identifier', 'sql_format_string_literal',
 
     # Submodules.
-    'clauses', 'compositions', 'expressions', 'functions', 'queries',
+    'clauses', 'compositions', 'expressions', 'functions', 'queries', 'values',
 
     # Convinience functions.
     'sql', 'select', 'insert', 'update', 'delete',

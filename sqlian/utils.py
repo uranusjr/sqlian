@@ -1,6 +1,20 @@
 import collections
+import itertools
 
 import six
+
+
+def partition(predicate, iterable):
+    """Use `predicate` to partition entries into falsy and truthy ones.
+
+    Recipe taken from the official documentation.
+    https://docs.python.org/3/library/itertools.html#itertools-recipes
+    """
+    t1, t2 = itertools.tee(iterable)
+    return (
+        six.moves.filterfalse(predicate, t1),
+        six.moves.filter(predicate, t2),
+    )
 
 
 def sql_format_string_literal(value):
