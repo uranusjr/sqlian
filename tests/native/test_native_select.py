@@ -17,3 +17,15 @@ def test_select_where_like():
     assert query == """
         SELECT * FROM "person" WHERE "name" LIKE 'Mosky%' LIMIT 3 OFFSET 1
     """.strip()
+
+
+def test_select_where_in():
+    query = select(
+        from_='person',
+        where=[
+            (('person_id', 'in'), ['andy', 'bob']),
+        ],
+    )
+    assert query == """
+        SELECT * FROM "person" WHERE "person_id" IN ('andy', 'bob')
+    """.strip()

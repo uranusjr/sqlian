@@ -1,7 +1,7 @@
 import collections
 
-from .base import Named, Parsable, Sql, Value
-from .compositions import Assign, List
+from .base import Named, Parsable, Sql
+from .compositions import Assign, List, Value
 from .expressions import And, Equal, Ref, get_condition_classes
 from .utils import is_non_string_sequence, is_single_row
 
@@ -58,7 +58,11 @@ def parse_pair_as_condition(key, value):
     condition_classes = get_condition_classes()
     if isinstance(key, tuple):
         key, op = key
-        return condition_classes[op](Ref.parse(key), Value.parse(value))
+        try:
+            klass = condition_classes[op.upper()]
+        except KeyError:
+            raise ValueError('invalid operator {!r}'.format(op))
+        return klass(Ref.parse(key), Value.parse(value))
     for op, klass in condition_classes.items():
         if key.upper().endswith(' {}'.format(op)):
             return klass(Ref.parse(key[:-(len(op) + 1)]), Value.parse(value))

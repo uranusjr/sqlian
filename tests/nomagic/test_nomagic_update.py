@@ -1,6 +1,5 @@
 from sqlian import (
     sql,
-    base as b,
     clauses as c,
     compositions as m,
     expressions as e,
@@ -12,8 +11,8 @@ from sqlian import (
 def test_update():
     query = q.Update(
         c.Update(e.Ref('person')),
-        c.Set(m.Assign(e.Ref('name'), b.Value('Mosky Liu'))),
-        c.Where(e.Equal(e.Ref('person_id'), b.Value('mosky'))),
+        c.Set(m.Assign(e.Ref('name'), m.Value('Mosky Liu'))),
+        c.Where(e.Equal(e.Ref('person_id'), m.Value('mosky'))),
     )
     assert sql(query) == """
         UPDATE "person" SET "name" = 'Mosky Liu' WHERE "person_id" = 'mosky'

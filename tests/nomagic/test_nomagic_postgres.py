@@ -2,7 +2,6 @@ import pytest
 
 from sqlian import (
     sql,
-    base as b,
     clauses as c,
     compositions as m,
     expressions as e,
@@ -40,7 +39,7 @@ def test_insert_returning():
             c.Ref('person'),
             m.List(c.Ref('person_id'), c.Ref('name')),
         ),
-        c.Values(b.Value('mosky'), b.Value('Mosky Liu')),
+        c.Values(m.Value('mosky'), m.Value('Mosky Liu')),
         c.Returning(e.star),
     )
     assert sql(query) == (

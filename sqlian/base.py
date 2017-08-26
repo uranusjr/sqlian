@@ -1,10 +1,7 @@
 import collections
-import numbers
 import re
 
 import six
-
-from . import utils
 
 
 class Sql(six.text_type):
@@ -13,7 +10,7 @@ class Sql(six.text_type):
     def __new__(cls, base=u'', *args, **kwargs):
         if hasattr(base, '__sql__'):
             base = base.__sql__()
-        return six.text_type.__new__(cls, base, *args, **kwargs)
+        return super(Sql, cls).__new__(cls, base, *args, **kwargs)
 
     def __repr__(self):
         return 'Sql({})'.format(six.text_type.__repr__(self))
@@ -22,6 +19,7 @@ class Sql(six.text_type):
         return self
 
     def __mod__(self, other):
+        from .compositions import Value
         if isinstance(other, collections.Mapping):
             other = {k: Value.parse(v).__sql__() for k, v in other.items()}
         elif isinstance(other, collections.Sequence):
@@ -31,11 +29,13 @@ class Sql(six.text_type):
         return type(self)(super(Sql, self) % other)
 
     def format(self, *args, **kwargs):
+        from .compositions import Value
         args = (Value.parse(a).__sql__() for a in args)
         kwargs = {k: Value.parse(v).__sql__() for k, v in kwargs.items()}
         return type(self)(super(Sql, self).format(*args, **kwargs))
 
     def join(self, iterable):
+        from .compositions import Value
         return type(self)(super(Sql, self).join(
             Value.parse(i).__sql__() for i in iterable
         ))
@@ -91,28 +91,3 @@ class Parsable(object):
         if hasattr(value, '__sql__'):
             return value
         return cls.parse_native(value)
-
-
-class Value(Parsable):
-
-    __slots__ = ('wrapped',)
-
-    def __init__(self, wrapped):
-        super(Value, self).__init__()
-        self.wrapped = wrapped
-
-    def __repr__(self):
-        return 'Value({!r})'.format(self.wrapped)
-
-    def __sql__(self):
-        if self.wrapped is None:
-            return Sql('NULL')
-        if isinstance(self.wrapped, bool):
-            return {True: Sql('TRUE'), False: Sql('FALSE')}[self.wrapped]
-        if isinstance(self.wrapped, numbers.Number):
-            return Sql(self.wrapped)
-        if isinstance(self.wrapped, six.binary_type):
-            self.wrapped = self.wrapped.decode('utf-8')
-        if isinstance(self.wrapped, six.text_type):
-            return Sql(utils.sql_format_string_literal(self.wrapped))
-        raise UnescapableError(self.wrapped)

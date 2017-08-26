@@ -1,7 +1,8 @@
 import functools
 import inspect
 
-from .base import Parsable, Sql, Value
+from .base import Parsable, Sql
+from .compositions import Value
 from .utils import sql_format_identifier
 
 
