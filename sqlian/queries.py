@@ -2,8 +2,8 @@ import collections
 
 from . import clauses
 from .base import Named, Sql
-from .expressions import star
 from .utils import NativeRow, is_values_mapping_sequence
+from .values import star
 
 
 class QueryError(ValueError):

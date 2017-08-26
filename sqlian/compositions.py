@@ -1,40 +1,4 @@
-import numbers
-
-import six
-
-from .base import Named, Parsable, Sql, UnescapableError
-from .utils import is_non_string_sequence, sql_format_string_literal
-
-
-class Value(Parsable):
-
-    __slots__ = ('wrapped',)
-
-    def __init__(self, wrapped):
-        super(Value, self).__init__()
-        self.wrapped = wrapped
-
-    def __repr__(self):
-        return 'Value({!r})'.format(self.wrapped)
-
-    def __sql__(self):
-        if self.wrapped is None:
-            return Sql('NULL')
-        if isinstance(self.wrapped, bool):
-            return {True: Sql('TRUE'), False: Sql('FALSE')}[self.wrapped]
-        if isinstance(self.wrapped, numbers.Number):
-            return Sql(self.wrapped)
-        if isinstance(self.wrapped, six.binary_type):
-            self.wrapped = self.wrapped.decode('utf-8')
-        if isinstance(self.wrapped, six.text_type):
-            return Sql(sql_format_string_literal(self.wrapped))
-        raise UnescapableError(self.wrapped)
-
-    @classmethod
-    def parse_native(cls, value):
-        if is_non_string_sequence(value):
-            return List(*(cls.parse(v) for v in value))
-        return super(Value, cls).parse_native(value)
+from .base import Named, Sql
 
 
 class Composition(object):

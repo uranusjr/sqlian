@@ -19,7 +19,7 @@ class Sql(six.text_type):
         return self
 
     def __mod__(self, other):
-        from .compositions import Value
+        from .values import Value
         if isinstance(other, collections.Mapping):
             other = {k: Value.parse(v).__sql__() for k, v in other.items()}
         elif isinstance(other, collections.Sequence):
@@ -29,13 +29,13 @@ class Sql(six.text_type):
         return type(self)(super(Sql, self) % other)
 
     def format(self, *args, **kwargs):
-        from .compositions import Value
+        from .values import Value
         args = (Value.parse(a).__sql__() for a in args)
         kwargs = {k: Value.parse(v).__sql__() for k, v in kwargs.items()}
         return type(self)(super(Sql, self).format(*args, **kwargs))
 
     def join(self, iterable):
-        from .compositions import Value
+        from .values import Value
         return type(self)(super(Sql, self).join(
             Value.parse(i).__sql__() for i in iterable
         ))

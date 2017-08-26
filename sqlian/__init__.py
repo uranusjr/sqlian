@@ -3,6 +3,7 @@ from .base import Named, Sql, UnescapableError
 from .expressions import Ref
 from .sql import sql, select, insert, update, delete
 from .utils import sql_format_identifier, sql_format_string_literal
+from .values import star
 
 
 __all__ = [
@@ -10,8 +11,10 @@ __all__ = [
     'VERSION', '__version__',
 
     # Base components.
-    'Sql', 'sql',
-    'Named', 'UnescapableError',
+    'Sql', 'Named', 'UnescapableError',
+
+    # Constants.
+    'star',
 
     # Expressions.
     'Ref',

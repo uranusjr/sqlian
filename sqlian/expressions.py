@@ -2,20 +2,8 @@ import functools
 import inspect
 
 from .base import Parsable, Sql
-from .compositions import Value
 from .utils import sql_format_identifier
-
-
-class Star(object):
-
-    def __repr__(self):
-        return 'Sql(*)'
-
-    def __sql__(self):
-        return Sql('*')
-
-
-star = Star()
+from .values import Value, null
 
 
 class Expression(Parsable):
@@ -39,6 +27,8 @@ class Ref(Expression):
         )
 
     def __eq__(self, operand):
+        if operand is null:
+            return Is(self, null)
         return Equal(self, Value.parse(operand))
 
     @classmethod
@@ -72,24 +62,17 @@ class Condition(Expression):
         )
 
 
-class Suffix(Condition):
-    def __sql__(self):
-        return Sql('{} {}').format(
-            Sql(' ').join(self.operands), Sql(self.operator),
-        )
-
-
 class Infix(Condition):
     def __sql__(self):
         return Sql(' {} '.format(self.operator)).join(self.operands)
 
 
-class IsNull(Suffix):
-    operator = 'IS NULL'
+class Is(Infix):
+    operator = 'IS'
 
 
-class IsNotNull(Suffix):
-    operator = 'IS NOT NULL'
+class IsNot(Infix):
+    operator = 'IS NOT'
 
 
 class Equal(Infix):

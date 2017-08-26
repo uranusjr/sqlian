@@ -29,3 +29,13 @@ def test_select_where_in():
     assert query == """
         SELECT * FROM "person" WHERE "person_id" IN ('andy', 'bob')
     """.strip()
+
+
+def test_select_where_is_null():
+    query = select(
+        from_='person',
+        where={'name': None},
+    )
+    assert query == """
+        SELECT * FROM "person" WHERE "name" IS NULL
+    """.strip()

@@ -1,9 +1,12 @@
 import collections
 
 from .base import Named, Parsable, Sql
-from .compositions import Assign, List, Value
-from .expressions import And, Equal, Ref, get_condition_classes
+from .compositions import Assign, List
+from .expressions import (
+    And, Condition, Equal, In, Is, Ref, get_condition_classes,
+)
 from .utils import is_non_string_sequence, is_single_row
+from .values import Value, null
 
 
 class Clause(Named, Parsable):
@@ -56,17 +59,31 @@ class From(TableClause):
 
 def parse_pair_as_condition(key, value):
     condition_classes = get_condition_classes()
+
+    # Explicit tuple operator.
     if isinstance(key, tuple):
-        key, op = key
-        try:
-            klass = condition_classes[op.upper()]
-        except KeyError:
-            raise ValueError('invalid operator {!r}'.format(op))
+        key, klass = key
+        if not isinstance(klass, Condition):
+            try:
+                klass = condition_classes[str(klass).upper()]
+            except KeyError:
+                raise ValueError('invalid operator {!r}'.format(klass))
         return klass(Ref.parse(key), Value.parse(value))
+
+    # Parse in-key operator.
     for op, klass in condition_classes.items():
         if key.upper().endswith(' {}'.format(op)):
             return klass(Ref.parse(key[:-(len(op) + 1)]), Value.parse(value))
-    return Equal(Ref.parse(key), Value.parse(value))
+
+    # Auto-detect operator based on right-hand value.
+    parsed = Value.parse(value)
+    if parsed is null:
+        klass = Is
+    elif isinstance(parsed, List):
+        klass = In
+    else:
+        klass = Equal
+    return klass(Ref.parse(key), parsed)
 
 
 def parse_native_as_condition(data):
