@@ -28,3 +28,25 @@ def is_single_row(iterable):
         getattr(iterable, '__single_row__', False) or
         any(not is_non_string_sequence(v) for v in iterable)
     )
+
+
+def is_values_mapping_sequence(s):
+    """Check if `s` is a native VALUES mapping sequence.
+
+    A variable is a VALUES mapping sequence if it is a sequence of mappings,
+    and all mappings in it have the same keys.
+    """
+    return (
+        isinstance(s, collections.Sequence) and
+        all(isinstance(d, collections.Mapping) for d in s) and
+        len({frozenset(d.keys()) for d in s}) == 1
+    )
+
+
+class NativeRow(collections.UserList):
+    """A list that explicits represents a single row, not a sequence of rows.
+
+    This acts like a normal list, but sets an explicit marker to indicate it
+    is a single row, to disable the auto-parsing functionality.
+    """
+    __single_row__ = True

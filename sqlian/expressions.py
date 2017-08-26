@@ -1,9 +1,7 @@
-import collections
 import functools
 import inspect
 
 from .base import Sql, sql
-from .compositions import List
 from .utils import sql_format_identifier
 
 
@@ -128,26 +126,3 @@ def get_condition_classes():
         value.operator: value for value in globals().values()
         if inspect.isclass(value) and hasattr(value, 'operator')
     }
-
-
-def parse_pair_as_condition(key, value):
-    condition_classes = get_condition_classes()
-    if isinstance(key, tuple):
-        key, op = key
-        return condition_classes[op](Ref(key), value)
-    for op, klass in condition_classes.items():
-        if key.endswith(' {}'.format(op)):
-            return klass(Ref(key[:-(len(op) + 1)]), value)
-    return Equal(Ref(key), value)
-
-
-def parse_native_as_condition(data):
-    if isinstance(data, collections.Mapping):
-        data = data.items()
-    elif not isinstance(data, collections.Sequence):
-        return sql(data)
-    return And(*(parse_pair_as_condition(key, value) for key, value in data))
-
-
-def parse_native_as_ref_list(names):
-    return List(*(Ref(n) for n in names))

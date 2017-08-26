@@ -1,8 +1,8 @@
-from .base import Named, Sql, ensure_sql
+import collections
+
+from .base import Named, Sql, ensure_sql, sql
 from .compositions import List
-from .expressions import (
-    Ref, parse_native_as_condition, parse_native_as_ref_list,
-)
+from .expressions import And, Equal, Ref, get_condition_classes
 from .utils import is_single_row
 
 
@@ -131,3 +131,28 @@ class On(Clause):
 class Using(Clause):
     def __init__(self, using_list):
         super(Using, self).__init__(using_list)
+
+
+# Native construct parsers.
+
+def parse_pair_as_condition(key, value):
+    condition_classes = get_condition_classes()
+    if isinstance(key, tuple):
+        key, op = key
+        return condition_classes[op](Ref(key), value)
+    for op, klass in condition_classes.items():
+        if key.endswith(' {}'.format(op)):
+            return klass(Ref(key[:-(len(op) + 1)]), value)
+    return Equal(Ref(key), value)
+
+
+def parse_native_as_condition(data):
+    if isinstance(data, collections.Mapping):
+        data = data.items()
+    elif not isinstance(data, collections.Sequence):
+        return sql(data)
+    return And(*(parse_pair_as_condition(key, value) for key, value in data))
+
+
+def parse_native_as_ref_list(names):
+    return List(*(Ref(n) for n in names))

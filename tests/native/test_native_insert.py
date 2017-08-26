@@ -1,5 +1,3 @@
-import pytest
-
 from sqlian import insert
 
 
@@ -41,11 +39,24 @@ def test_insert_dict():
     )
 
 
-def test_insert_empty_values():
+def test_insert_dict_multiple():
+    query = insert(
+        'person', values=[
+            {'person_id': 'mosky', 'name': 'Mosky Liu'},
+            {'name': 'Yi-Yu Liu', 'person_id': 'yiyu'},
+        ],
+    )
+    assert query == (
+        """INSERT INTO "person" ("person_id", "name") """
+        """VALUES ('mosky', 'Mosky Liu'), ('yiyu', 'Yi-Yu Liu')"""
+    )
+
+
+def test_insert_no_values():
     query = insert('person', values=())
     assert query == """INSERT INTO "person" VALUES ()"""
 
 
-def test_insert_empty_values_multiple():
+def test_insert_no_values_multiple():
     query = insert('person', values=[(), (), ()])
     assert query == """INSERT INTO "person" VALUES (), (), ()"""

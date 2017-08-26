@@ -2,6 +2,7 @@ import collections
 
 from . import clauses
 from .base import Named, Sql
+from .utils import NativeRow, is_values_mapping_sequence
 
 
 class QueryError(ValueError):
@@ -102,18 +103,21 @@ class Insert(Query):
         # Unpack mapping 'values' kwarg into 'columns' and 'values' kwargs.
         # This only happens if the 'columns' kwarg is not already set.
         values_kwarg = kwargs.get('values')
-        if ('columns' not in kwargs and
-                isinstance(values_kwarg, collections.Mapping)):
-            # Wrap the values interable and set ax explicit marker to indicate
-            # it is a single row, to disable the auto-parsing functionality
-            # allowing you to pass either a single row as list, or multiple
-            # rows as list of lists into the 'values' kwarg.
-            single_row_values = collections.UserList(values_kwarg.values())
-            single_row_values.__single_row__ = True
-            kwargs.update({
-                'columns': values_kwarg.keys(),
-                'values': single_row_values,
-            })
+        if 'columns' not in kwargs:
+            if isinstance(values_kwarg, collections.Mapping):
+                kwargs.update({
+                    'columns': values_kwarg.keys(),
+                    'values': NativeRow(values_kwarg.values()),
+                })
+            elif is_values_mapping_sequence(values_kwarg):
+                # We need to re-pack the value dicts because the ordering of
+                # `dict.values()` is not guarenteed to be consistent, even
+                # if the keys are identical.
+                columns = values_kwarg[0].keys()
+                kwargs.update({
+                    'columns': columns,
+                    'values': [[d[k] for k in columns] for d in values_kwarg],
+                })
         super(Insert, self).__init__(*args, **kwargs)
 
 
