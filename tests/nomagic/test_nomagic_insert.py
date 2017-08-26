@@ -1,5 +1,6 @@
 from sqlian import (
     sql,
+    base as b,
     clauses as c,
     compositions as m,
     expressions as e,
@@ -11,7 +12,7 @@ def test_insert():
     query = q.Insert(
         c.InsertInto(e.Ref('person')),
         c.Columns(m.List(e.Ref('person_id'), e.Ref('name'))),
-        c.Values(m.List('mosky', 'Mosky Liu')),
+        c.Values(m.List(b.Value('mosky'), b.Value('Mosky Liu'))),
     )
     assert sql(query) == (
         """INSERT INTO "person" ("person_id", "name") """
@@ -22,7 +23,7 @@ def test_insert():
 def test_insert_values():
     query = q.Insert(
         c.InsertInto(e.Ref('person')),
-        c.Values(m.List('mosky', 'Mosky Liu')),
+        c.Values(m.List(b.Value('mosky'), b.Value('Mosky Liu'))),
     )
     assert sql(query) == """
         INSERT INTO "person" VALUES ('mosky', 'Mosky Liu')
@@ -32,7 +33,9 @@ def test_insert_values():
 def test_insert_values_multiple():
     query = q.Insert(
         c.InsertInto(e.Ref('person')),
-        c.Values(m.List('mosky', 'Mosky Liu'), m.List('yiyu', 'Yi-Yu Liu')),
+        c.Values(
+            m.List(b.Value('mosky'), b.Value('Mosky Liu')),
+            m.List(b.Value('yiyu'), b.Value('Yi-Yu Liu'))),
     )
     assert sql(query) == (
         'INSERT INTO "person" '

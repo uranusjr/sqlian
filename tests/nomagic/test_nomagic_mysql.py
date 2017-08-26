@@ -2,6 +2,7 @@ import pytest
 
 from sqlian import (
     sql,
+    base as b,
     clauses as c,
     compositions as m,
     expressions as e,
@@ -17,7 +18,7 @@ def test_select_for_update():
     query = q.Select(
         c.Select(f.Count(e.star)),
         c.From(e.Ref('person')),
-        c.Where(e.Equal(e.Ref('person_id'), 1)),
+        c.Where(e.Equal(e.Ref('person_id'), b.Value(1))),
         c.ForUpdate(),
     )
     assert sql(query) == (
@@ -29,7 +30,7 @@ def test_select_lock_in_share_mode():
     query = q.Select(
         c.Select(f.Count(e.star)),
         c.From(e.Ref('person')),
-        c.Where(e.Equal(e.Ref('person_id'), 1)),
+        c.Where(e.Equal(e.Ref('person_id'), b.Value(1))),
         c.LockInShareMode(),
     )
     assert sql(query) == (
@@ -40,8 +41,8 @@ def test_select_lock_in_share_mode():
 def test_insert_on_duplicate_key_update():
     query = q.Insert(
         c.InsertInto(e.Ref('person')),
-        c.Values(m.List('mosky', 'Mosky Liu')),
-        c.OnDuplicateKeyUpdate(m.Assign(e.Ref('name'), 'Mosky Liu')),
+        c.Values(m.List(b.Value('mosky'), b.Value('Mosky Liu'))),
+        c.OnDuplicateKeyUpdate(m.Assign(e.Ref('name'), b.Value('Mosky Liu'))),
     )
     assert sql(query) == (
         'INSERT INTO "person" '
@@ -56,7 +57,7 @@ def test_replace():
             e.Ref('person'),
             m.List(e.Ref('person_id'), e.Ref('name')),
         ),
-        c.Values(m.List('mosky', 'Mosky Liu')),
+        c.Values(m.List(b.Value('mosky'), b.Value('Mosky Liu'))),
     )
     assert sql(query) == (
         'REPLACE INTO "person" ("person_id", "name") '

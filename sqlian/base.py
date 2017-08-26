@@ -10,7 +10,7 @@ from . import utils
 CAMEL_RE = re.compile(r'([a-z])([A-Z])')
 
 
-def assert_safe(f):
+def assert_sql(f):
     """Make sure the decorated function returns an SQL object.
     """
     @functools.wraps(f)
@@ -27,7 +27,7 @@ class Sql(six.text_type):
     """
     def __new__(cls, base=u'', *args, **kwargs):
         if hasattr(base, '__sql__'):
-            base = assert_safe(base.__sql__)()
+            base = base.__sql__()
         return six.text_type.__new__(cls, base, *args, **kwargs)
 
     def __repr__(self):
@@ -55,22 +55,10 @@ class UnescapableError(ValueError):
         )
 
 
-@assert_safe
+@assert_sql
 def sql(obj):
-    """Make an SQL string out of the input.
-    """
     if hasattr(obj, '__sql__'):
         return obj.__sql__()
-    if obj is None:
-        return Sql('NULL')
-    if isinstance(obj, bool):
-        return {True: Sql('TRUE'), False: Sql('FALSE')}[obj]
-    if isinstance(obj, numbers.Number):
-        return Sql(obj)
-    if isinstance(obj, six.binary_type):
-        obj = obj.decode('utf-8')
-    if isinstance(obj, six.text_type):
-        return Sql(utils.sql_format_string_literal(obj))
     raise UnescapableError(obj)
 
 
@@ -91,7 +79,26 @@ class Named(object):
         ))
 
 
-def ensure_sql(value, transform):
-    """Ensure value is a SQL component.
-    """
-    return value if hasattr(value, '__sql__') else transform(value)
+class Value(object):
+
+    __slots__ = ('wrapped',)
+
+    def __init__(self, wrapped):
+        super(Value, self).__init__()
+        self.wrapped = wrapped
+
+    def __repr__(self):
+        return 'Value({!r})'.format(self.wrapped)
+
+    def __sql__(self):
+        if self.wrapped is None:
+            return Sql('NULL')
+        if isinstance(self.wrapped, bool):
+            return {True: Sql('TRUE'), False: Sql('FALSE')}[self.wrapped]
+        if isinstance(self.wrapped, numbers.Number):
+            return Sql(self.wrapped)
+        if isinstance(self.wrapped, six.binary_type):
+            self.wrapped = self.wrapped.decode('utf-8')
+        if isinstance(self.wrapped, six.text_type):
+            return Sql(utils.sql_format_string_literal(self.wrapped))
+        raise UnescapableError(self.wrapped)

@@ -1,9 +1,15 @@
 import collections
 
-from .base import Named, Sql, ensure_sql, sql
+from .base import Named, Sql, sql
 from .compositions import Assign, List
 from .expressions import And, Equal, Ref, get_condition_classes
 from .utils import is_single_row
+
+
+def ensure_sql(value, transform):
+    """Ensure value is a SQL component.
+    """
+    return value if hasattr(value, '__sql__') else transform(value)
 
 
 class Clause(Named):

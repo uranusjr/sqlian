@@ -1,5 +1,6 @@
 from sqlian import (
     sql,
+    base as b,
     clauses as c,
     compositions as m,
     expressions as e,
@@ -12,7 +13,7 @@ def test_select_where_equal():
     query = q.Select(
         c.Select(e.Ref('person_id')),
         c.From(e.Ref('person')),
-        c.Where(e.Equal(e.Ref('person_id'), 'mosky')),
+        c.Where(e.Equal(e.Ref('person_id'), b.Value('mosky'))),
     )
     assert sql(query) == """
         SELECT "person_id" FROM "person" WHERE "person_id" = 'mosky'
@@ -23,8 +24,8 @@ def test_select_where_like():
     query = q.Select(
         c.Select(e.star),
         c.From(e.Ref('person')),
-        c.Where(e.Like(e.Ref('name'), 'Mosky%')),
-        c.Limit(3), c.Offset(1),
+        c.Where(e.Like(e.Ref('name'), b.Value('Mosky%'))),
+        c.Limit(b.Value(3)), c.Offset(b.Value(1)),
     )
     assert sql(query) == """
         SELECT * FROM "person" WHERE "name" LIKE 'Mosky%' LIMIT 3 OFFSET 1
@@ -35,7 +36,10 @@ def test_select_where_in():
     query = q.Select(
         c.Select(e.star),
         c.From(e.Ref('person')),
-        c.Where(e.In(e.Ref('person_id'), m.List('andy', 'bob'))),
+        c.Where(e.In(
+            e.Ref('person_id'),
+            m.List(b.Value('andy'), b.Value('bob')),
+        )),
     )
     assert sql(query) == """
         SELECT * FROM "person" WHERE "person_id" IN ('andy', 'bob')
@@ -58,8 +62,8 @@ def test_select_where_greater_than_like():
         c.Select(e.star),
         c.From(e.Ref('person')),
         c.Where(e.And(
-            e.GreaterThan(e.Ref('age'), 20),
-            e.Like(e.Ref('name'), 'Mosky%')
+            e.GreaterThan(e.Ref('age'), b.Value(20)),
+            e.Like(e.Ref('name'), b.Value('Mosky%'))
         )),
     )
     assert sql(query) == """
@@ -71,7 +75,7 @@ def test_select_where_false():
     query = q.Select(
         c.Select(e.star),
         c.From(e.Ref('person')),
-        c.Where(False),
+        c.Where(b.Value(False)),
     )
     assert sql(query) == 'SELECT * FROM "person" WHERE FALSE'
 
@@ -111,7 +115,7 @@ def test_select_order_by():
     query = q.Select(
         c.Select(e.star),
         c.From(e.Ref('person')),
-        c.Where(e.Like(e.Ref('name'), 'Mosky%')),
+        c.Where(e.Like(e.Ref('name'), b.Value('Mosky%'))),
         c.OrderBy(e.Ref('age')),
     )
     assert sql(query) == """
@@ -123,7 +127,7 @@ def test_select_order_by_desc():
     query = q.Select(
         c.Select(e.star),
         c.From(e.Ref('person')),
-        c.Where(e.Like(e.Ref('name'), 'Mosky%')),
+        c.Where(e.Like(e.Ref('name'), b.Value('Mosky%'))),
         c.OrderBy(m.Ordering(e.Ref('age'), 'desc')),
     )
     assert sql(query) == """
