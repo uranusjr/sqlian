@@ -33,9 +33,12 @@ def test_insert_dict():
     query = insert(
         'person', values={'person_id': 'mosky', 'name': 'Mosky Liu'},
     )
-    assert query == (
+    assert query in (   # Either order works.
         """INSERT INTO "person" ("person_id", "name") """
-        """VALUES ('mosky', 'Mosky Liu')"""
+        """VALUES ('mosky', 'Mosky Liu')""",
+
+        """INSERT INTO "person" ("name", "person_id") """
+        """VALUES ('Mosky Liu', 'mosky')""",
     )
 
 
@@ -46,9 +49,12 @@ def test_insert_dict_multiple():
             {'name': 'Yi-Yu Liu', 'person_id': 'yiyu'},
         ],
     )
-    assert query == (
+    assert query in (   # Either order works.
         """INSERT INTO "person" ("person_id", "name") """
-        """VALUES ('mosky', 'Mosky Liu'), ('yiyu', 'Yi-Yu Liu')"""
+        """VALUES ('mosky', 'Mosky Liu'), ('yiyu', 'Yi-Yu Liu')""",
+
+        """INSERT INTO "person" ("name", "person_id") """
+        """VALUES ('Mosky Liu', 'mosky'), ('Yi-Yu Liu', 'yiyu')""",
     )
 
 

@@ -1,4 +1,6 @@
-from sqlian import select
+import pytest
+
+from sqlian import Value, select
 
 
 def test_select_where_equal():
@@ -43,9 +45,10 @@ def test_select_where_is_null():
 
 def test_select_where_greater_than_like():
     query = select(from_='person', where={'age >': 20, 'name LIKE': 'Mosky%'})
-    assert query == """
-        SELECT * FROM "person" WHERE "age" > 20 AND "name" LIKE 'Mosky%'
-    """.strip()
+    assert query in (   # Either one works.
+        """SELECT * FROM "person" WHERE "age" > 20 AND "name" LIKE 'Mosky%'""",
+        """SELECT * FROM "person" WHERE "name" LIKE 'Mosky%' AND "age" > 20""",
+    )
 
 
 def test_select_where_false():
@@ -61,3 +64,24 @@ def test_select_from():
 def test_select_constant():
     query = select(1)
     assert query == 'SELECT 1'
+
+
+@pytest.mark.xfail(reason='Not auto-wrapping things inside clause.')
+def test_select_string_constant():
+    query = select(Value('foo'))
+    assert query == "SELECT 'foo'"
+
+
+def test_select_qualified():
+    query = select('person.person_id', 'person.name', from_='person')
+    assert query == (
+        'SELECT "person"."person_id", "person"."name" FROM "person"'
+    )
+
+
+@pytest.mark.xfail(reason='Should parse single 2-tuple arg as AS composition.')
+def test_select_qualified_as():
+    query = select(('person.person_id', 'id'), 'perso.name', from_='person')
+    assert query == (
+        'SELECT "person"."person_id" AS "id", "person"."name" FROM "person"'
+    )

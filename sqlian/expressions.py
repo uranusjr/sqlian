@@ -1,6 +1,6 @@
-import functools
 import inspect
 
+from . import compat
 from .base import Parsable, Sql
 from .utils import sql_format_identifier
 from .values import Value, null
@@ -111,7 +111,7 @@ class And(Infix):
     operator = 'AND'
 
 
-@functools.lru_cache(maxsize=1)
+@compat.lru_cache(maxsize=1)
 def get_condition_classes():
     return {
         value.operator: value for value in globals().values()

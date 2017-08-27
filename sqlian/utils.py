@@ -57,7 +57,7 @@ def is_values_mapping_sequence(s):
     )
 
 
-class NativeRow(collections.UserList):
+class NativeRow(six.moves.UserList):
     """A list that explicits represents a single row, not a sequence of rows.
 
     This acts like a normal list, but sets an explicit marker to indicate it
