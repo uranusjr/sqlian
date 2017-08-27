@@ -79,9 +79,25 @@ def test_select_qualified():
     )
 
 
-@pytest.mark.xfail(reason='Should parse single 2-tuple arg as AS composition.')
+def test_select_qualified_list():
+    query = select(['person.person_id', 'person.name'], from_='person')
+    assert query == (
+        'SELECT "person"."person_id", "person"."name" FROM "person"'
+    )
+
+
 def test_select_qualified_as():
-    query = select(('person.person_id', 'id'), 'perso.name', from_='person')
+    query = select(('person.person_id', 'id'), 'person.name', from_='person')
     assert query == (
         'SELECT "person"."person_id" AS "id", "person"."name" FROM "person"'
     )
+
+
+def test_select_qualified_as_single():
+    query = select(('person.person_id', 'id'), from_='person')
+    assert query == 'SELECT "person"."person_id" AS "id" FROM "person"'
+
+
+def test_select_qualified_as_single_in_list():
+    query = select([('person.person_id', 'id')], from_='person')
+    assert query == 'SELECT "person"."person_id" AS "id" FROM "person"'

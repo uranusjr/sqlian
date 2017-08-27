@@ -3,11 +3,11 @@ import collections
 import six
 
 from .base import Named, Parsable, Sql
-from .compositions import Assign, List
+from .compositions import As, Assign, List
 from .expressions import (
     And, Condition, Equal, In, Is, Ref, get_condition_classes,
 )
-from .utils import is_non_string_sequence, is_single_row
+from .utils import is_flat_two_tuple, is_non_string_sequence, is_single_row
 from .values import Value, null
 
 
@@ -50,6 +50,9 @@ class TableClause(Clause):
 class Select(Clause):
     @classmethod
     def parse(cls, value):
+        # Special case: 2-string-tuple is AS instead of a list of columns.
+        if is_flat_two_tuple(value):
+            return cls(Ref.parse(value))
         if is_non_string_sequence(value):
             return cls(*(Ref.parse(v) for v in value))
         if not isinstance(value, six.string_types):

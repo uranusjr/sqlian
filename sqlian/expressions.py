@@ -2,7 +2,8 @@ import inspect
 
 from . import compat
 from .base import Parsable, Sql
-from .utils import sql_format_identifier
+from .compositions import As
+from .utils import is_flat_two_tuple, sql_format_identifier
 from .values import Value, null
 
 
@@ -33,6 +34,9 @@ class Ref(Expression):
 
     @classmethod
     def parse_native(cls, value):
+        if is_flat_two_tuple(value):
+            exp, alias = value
+            return As(cls.parse(exp), Ref.parse(alias))
         return cls(*value.split('.'))
 
 

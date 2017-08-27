@@ -30,6 +30,14 @@ def sql_format_identifier(name):
     return '"{}"'.format(name)
 
 
+def is_flat_two_tuple(s):
+    return (
+        isinstance(s, tuple) and
+        len(s) == 2 and
+        all(not is_non_string_sequence(v) for v in s)
+    )
+
+
 def is_non_string_sequence(s):
     return (
         isinstance(s, collections.Sequence) and
