@@ -3,11 +3,14 @@ import collections
 import six
 
 from .base import Named, Parsable, Sql
-from .compositions import As, Assign, List
+from .compositions import Assign, List, Ordering
 from .expressions import (
     And, Condition, Equal, In, Is, Ref, get_condition_classes,
 )
-from .utils import is_flat_two_tuple, is_non_string_sequence, is_single_row
+from .utils import (
+    is_flat_two_tuple, is_non_string_sequence, is_single_row,
+    rstrip_composition_suffix,
+)
 from .values import Value, null
 
 
@@ -31,25 +34,28 @@ class Clause(Named, Parsable):
 
     @classmethod
     def parse(cls, value):
+        # This is a rare case we extend parse(). Clauses contribute to the
+        # output SQL, and therefore we need to make sure inner values are
+        # wrapped in a Clause so the result SQL contains correct keywords.
         parsed = super(Clause, cls).parse(value)
         if isinstance(parsed, Clause):
             return parsed
         return cls(parsed)
 
 
-class TableClause(Clause):
+class RefClause(Clause):
 
     def __init__(self, ref):
-        super(TableClause, self).__init__(ref)
+        super(RefClause, self).__init__(ref)
 
     @classmethod
-    def parse(cls, value):
+    def parse_native(cls, value):
         return cls(Ref.parse(value))
 
 
 class Select(Clause):
     @classmethod
-    def parse(cls, value):
+    def parse_native(cls, value):
         # Special case: 2-string-tuple is AS instead of a list of columns.
         if is_flat_two_tuple(value):
             return cls(Ref.parse(value))
@@ -60,7 +66,7 @@ class Select(Clause):
         return cls(Ref.parse(value))
 
 
-class From(TableClause):
+class From(RefClause):
     pass
 
 
@@ -68,7 +74,7 @@ def parse_pair_as_condition(key, value):
     condition_classes = get_condition_classes()
 
     # Explicit tuple operator.
-    if isinstance(key, tuple):
+    if is_flat_two_tuple(key):
         key, klass = key
         if not isinstance(klass, Condition):
             try:
@@ -80,7 +86,10 @@ def parse_pair_as_condition(key, value):
     # Parse in-key operator.
     for op, klass in condition_classes.items():
         if key.upper().endswith(' {}'.format(op)):
-            return klass(Ref.parse(key[:-(len(op) + 1)]), Value.parse(value))
+            return klass(
+                Ref.parse(rstrip_composition_suffix(key, op)),
+                Value.parse(value),
+            )
 
     # Auto-detect operator based on right-hand value.
     parsed = Value.parse(value)
@@ -93,16 +102,6 @@ def parse_pair_as_condition(key, value):
     return klass(Ref.parse(key), parsed)
 
 
-def parse_native_as_condition(data):
-    if isinstance(data, collections.Mapping):
-        data = data.items()
-    elif not isinstance(data, collections.Sequence):
-        return Value.parse(data)
-    if is_single_row(data) and len(data) == 2:
-        return parse_pair_as_condition(*data)
-    return And(*(parse_pair_as_condition(key, value) for key, value in data))
-
-
 class Where(Clause):
 
     def __init__(self, condition):
@@ -110,15 +109,39 @@ class Where(Clause):
 
     @classmethod
     def parse_native(cls, value):
-        return cls(parse_native_as_condition(value))
+        if isinstance(value, collections.Mapping):
+            value = value.items()
+        elif not isinstance(value, collections.Sequence):
+            return cls(Value.parse(value))
+        if is_single_row(value) and len(value) == 2:
+            return cls(parse_pair_as_condition(*value))
+        return cls(And(*(
+            parse_pair_as_condition(key, value)
+            for key, value in value
+        )))
 
 
-class GroupBy(Clause):
+class GroupBy(RefClause):
     pass
 
 
 class OrderBy(Clause):
-    pass
+    @classmethod
+    def parse_native(cls, value):
+        # Parse explicit operator tuple.
+        if is_flat_two_tuple(value):
+            return cls(Ordering(Ref.parse(value[0]), value[1]))
+
+        # Parse in-key ordering.
+        for ordering in Ordering.allowed_orderings:
+            if value.upper().endswith(' {}'.format(ordering)):
+                return cls(Ordering(
+                    Ref.parse(rstrip_composition_suffix(value, ordering)),
+                    ordering,
+                ))
+
+        # Treat this like a ref name.
+        return cls(Ref.parse(value))
 
 
 class Limit(Clause):
@@ -131,7 +154,7 @@ class Offset(Clause):
         super(Offset, self).__init__(value)
 
 
-class InsertInto(TableClause):
+class InsertInto(RefClause):
     pass
 
 
@@ -166,7 +189,7 @@ class Values(Clause):
         ))
 
 
-class Update(TableClause):
+class Update(RefClause):
     pass
 
 
@@ -186,7 +209,7 @@ class Set(Clause):
         ))
 
 
-class DeleteFrom(TableClause):
+class DeleteFrom(RefClause):
     pass
 
 

@@ -75,6 +75,12 @@ class Select(Query):
         ('offset', c.Offset),
     ]
     default_param_class = c.Select
+    param_aliases = {
+        'group': 'group_by',
+        'groupby': 'group_by',
+        'order': 'order_by',
+        'orderby': 'order_by',
+    }
 
 
 class Insert(Query):

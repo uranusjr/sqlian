@@ -65,6 +65,10 @@ def is_values_mapping_sequence(s):
     )
 
 
+def rstrip_composition_suffix(key, suffix):
+    return key[:-(len(suffix) + 1)]
+
+
 class NativeRow(six.moves.UserList):
     """A list that explicits represents a single row, not a sequence of rows.
 

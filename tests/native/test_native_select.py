@@ -101,3 +101,36 @@ def test_select_qualified_as_single():
 def test_select_qualified_as_single_in_list():
     query = select([('person.person_id', 'id')], from_='person')
     assert query == 'SELECT "person"."person_id" AS "id" FROM "person"'
+
+
+def test_select_order_by():
+    query = select(
+        from_='person',
+        where={('name', 'like'): 'Mosky%'},
+        orderby='age',
+    )
+    assert query == """
+        SELECT * FROM "person" WHERE "name" LIKE 'Mosky%' ORDER BY "age"
+    """.strip()
+
+
+def test_select_order_by_desc():
+    query = select(
+        from_='person',
+        where={('name', 'like'): 'Mosky%'},
+        orderby=('age', 'desc'),
+    )
+    assert query == """
+        SELECT * FROM "person" WHERE "name" LIKE 'Mosky%' ORDER BY "age" DESC
+    """.strip()
+
+
+def test_select_order_by_desc_parse():
+    query = select(
+        from_='person',
+        where={('name', 'like'): 'Mosky%'},
+        order='age desc',
+    )
+    assert query == """
+        SELECT * FROM "person" WHERE "name" LIKE 'Mosky%' ORDER BY "age" DESC
+    """.strip()

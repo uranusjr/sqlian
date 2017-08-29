@@ -27,13 +27,15 @@ class As(Composition):
 
 class Ordering(Composition):
 
+    allowed_orderings = ['ASC', 'DESC']
+
     def __init__(self, expression, order):
         super(Ordering, self).__init__(expression, order)
-        order = Sql(order.upper())
-        if order not in ['ASC', 'DESC']:
+        order = order.upper()
+        if order not in self.allowed_orderings:
             raise ValueError('unsupported ordering {!r}'.format(order))
         self.expression = expression
-        self.order = order
+        self.order = Sql(order)
 
     def __sql__(self):
         return Sql('{} {}').format(self.expression, self.order)
