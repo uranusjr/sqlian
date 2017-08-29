@@ -3,12 +3,13 @@ import collections
 import six
 
 from .base import Named, Parsable, Sql
-from .compositions import Assign, List, Ordering
+from .compositions import Assign, Join, List, Ordering
 from .expressions import (
     And, Condition, Equal, In, Is, Ref, get_condition_classes,
 )
 from .utils import (
-    is_flat_two_tuple, is_non_string_sequence, is_single_row,
+    is_flat_tuple, is_flat_two_tuple, is_non_string_sequence,
+    is_partial_of, is_single_row,
     rstrip_composition_suffix,
 )
 from .values import Value, null
@@ -56,7 +57,7 @@ class RefClause(Clause):
 class Select(Clause):
     @classmethod
     def parse_native(cls, value):
-        # Special case: 2-string-tuple is AS instead of a list of columns.
+        # Special case: 2-string-tuple is AS instead of a sequence of columns.
         if is_flat_two_tuple(value):
             return cls(Ref.parse(value))
         if is_non_string_sequence(value):
@@ -66,11 +67,30 @@ class Select(Clause):
         return cls(Ref.parse(value))
 
 
-class From(RefClause):
-    pass
+def parse_from_argument(value):
+    if is_flat_tuple(value) and all(callable(v) for v in value[1:]):
+        item = Ref.parse(value[0])
+        for v in value[1:]:
+            item = v(item)
+        return item
+    return Ref.parse(value)
 
 
-def parse_pair_as_condition(key, value):
+class From(Clause):
+    @classmethod
+    def parse_native(cls, value):
+        # Special case: (Any, Join, ...) tuple is JOIN, not from-item sequence.
+        if (is_flat_tuple(value) and
+                all(is_partial_of(v, Join) for v in value[1:])):
+            return cls(parse_from_argument(value))
+        if is_non_string_sequence(value):
+            return cls(*(parse_from_argument(v) for v in value))
+        return cls(parse_from_argument(value))
+
+
+def parse_pair_as_condition(pair, default_ref):
+    key, value = pair
+    value_klass = Ref if default_ref else Value
     condition_classes = get_condition_classes()
 
     # Explicit tuple operator.
@@ -81,18 +101,18 @@ def parse_pair_as_condition(key, value):
                 klass = condition_classes[str(klass).upper()]
             except KeyError:
                 raise ValueError('invalid operator {!r}'.format(klass))
-        return klass(Ref.parse(key), Value.parse(value))
+        return klass(Ref.parse(key), value_klass.parse(value))
 
     # Parse in-key operator.
     for op, klass in condition_classes.items():
         if key.upper().endswith(' {}'.format(op)):
             return klass(
                 Ref.parse(rstrip_composition_suffix(key, op)),
-                Value.parse(value),
+                value_klass.parse(value),
             )
 
     # Auto-detect operator based on right-hand value.
-    parsed = Value.parse(value)
+    parsed = value_klass.parse(value)
     if parsed is null:
         klass = Is
     elif isinstance(parsed, List):
@@ -102,6 +122,19 @@ def parse_pair_as_condition(key, value):
     return klass(Ref.parse(key), parsed)
 
 
+def parse_as_condition(value, default_ref=False):
+    if isinstance(value, collections.Mapping):
+        value = value.items()
+    elif not isinstance(value, collections.Sequence):
+        return Value.parse(value)
+    if is_single_row(value) and len(value) == 2:
+        return parse_pair_as_condition(value, default_ref=default_ref)
+    return And(*(
+        parse_pair_as_condition((key, value), default_ref=default_ref)
+        for key, value in value
+    ))
+
+
 class Where(Clause):
 
     def __init__(self, condition):
@@ -109,16 +142,7 @@ class Where(Clause):
 
     @classmethod
     def parse_native(cls, value):
-        if isinstance(value, collections.Mapping):
-            value = value.items()
-        elif not isinstance(value, collections.Sequence):
-            return cls(Value.parse(value))
-        if is_single_row(value) and len(value) == 2:
-            return cls(parse_pair_as_condition(*value))
-        return cls(And(*(
-            parse_pair_as_condition(key, value)
-            for key, value in value
-        )))
+        return cls(parse_as_condition(value))
 
 
 class GroupBy(RefClause):
@@ -214,10 +238,22 @@ class DeleteFrom(RefClause):
 
 
 class On(Clause):
+
     def __init__(self, condition):
         super(On, self).__init__(condition)
 
+    @classmethod
+    def parse_native(cls, value):
+        return cls(parse_as_condition(value, default_ref=True))
+
 
 class Using(Clause):
+
     def __init__(self, using_list):
         super(Using, self).__init__(using_list)
+
+    @classmethod
+    def parse_native(cls, value):
+        if not is_non_string_sequence(value):
+            value = [value]
+        return cls(List(*(Ref.parse(v) for v in value)))

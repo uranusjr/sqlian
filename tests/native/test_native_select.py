@@ -1,6 +1,6 @@
 import pytest
 
-from sqlian import Value, select
+from sqlian import Count, Value, join, select, star
 
 
 def test_select_where_equal():
@@ -61,12 +61,21 @@ def test_select_from():
     assert query == 'SELECT * FROM "person"'
 
 
+def test_select_from_multiple():
+    query = select(from_=('person', 'detail'))
+    assert query == 'SELECT * FROM "person", "detail"'
+
+
+def test_select_from_one():
+    query = select(from_=['person'])
+    assert query == 'SELECT * FROM "person"'
+
+
 def test_select_constant():
     query = select(1)
     assert query == 'SELECT 1'
 
 
-@pytest.mark.xfail(reason='Not auto-wrapping things inside clause.')
 def test_select_string_constant():
     query = select(Value('foo'))
     assert query == "SELECT 'foo'"
@@ -133,4 +142,54 @@ def test_select_order_by_desc_parse():
     )
     assert query == """
         SELECT * FROM "person" WHERE "name" LIKE 'Mosky%' ORDER BY "age" DESC
+    """.strip()
+
+
+@pytest.mark.skip(reason='Need more thought how to do native param well.')
+def test_select_param():
+    query = select()
+    assert query == (
+        'SELECT * FROM "table" '
+        'WHERE "auto_param" = %(auto_param)s '
+        'AND "using_alias" = %(using_alias)s '
+        'AND "custom_param" = %(my_param)s'
+    )
+
+
+def test_select_count():
+    query = select(Count(star), from_='person', group_by='age')
+    assert query == 'SELECT COUNT(*) FROM "person" GROUP BY "age"'
+
+
+def test_select_join_natural():
+    query = select(from_=('person', join.natural('detail')))
+    assert query == 'SELECT * FROM "person" NATURAL JOIN "detail"'
+
+
+def test_select_join_inner_on():
+    query = select(from_=('person', join.inner('detail', on={
+        'person.person_id': 'detail.person_id',
+    })))
+    assert query == (
+        'SELECT * FROM "person" '
+        'INNER JOIN "detail" ON "person"."person_id" = "detail"."person_id"'
+    )
+
+
+def test_select_join_left_using():
+    query = select(from_=('person', join.left('detail', using='person_id')))
+    assert query == """
+        SELECT * FROM "person" LEFT JOIN "detail" USING ("person_id")
+    """.strip()
+
+
+def test_select_join_cross():
+    query = select(from_=('person', join.cross('detail')))
+    assert query == 'SELECT * FROM "person" CROSS JOIN "detail"'
+
+
+def test_select_join_right_using():
+    query = select(from_=('person', join.right('detail', using=['person_id'])))
+    assert query == """
+        SELECT * FROM "person" RIGHT JOIN "detail" USING ("person_id")
     """.strip()

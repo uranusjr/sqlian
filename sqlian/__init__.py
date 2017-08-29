@@ -1,7 +1,12 @@
 from . import clauses, compositions, expressions, functions, queries, values
 from .base import Named, Sql, UnescapableError
 from .expressions import Ref
-from .sql import sql, select, insert, update, delete
+from .functions import Count
+from .sql import (
+    sql,
+    select, insert, update, delete,
+    join,
+)
 from .utils import sql_format_identifier, sql_format_string_literal
 from .values import Value, star
 
@@ -13,8 +18,11 @@ __all__ = [
     # Base components.
     'Sql', 'Named', 'UnescapableError',
 
-    # Expose some expressions.
+    # Expressions.
     'Ref', 'Value', 'star',
+
+    # Functions.
+    'Count',
 
     # Utilities.
     'sql_format_identifier', 'sql_format_string_literal',
@@ -23,7 +31,9 @@ __all__ = [
     'clauses', 'compositions', 'expressions', 'functions', 'queries', 'values',
 
     # Convinience functions.
-    'sql', 'select', 'insert', 'update', 'delete',
+    'sql',
+    'select', 'insert', 'update', 'delete',
+    'join',
 ]
 
 

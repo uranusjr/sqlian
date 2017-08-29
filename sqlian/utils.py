@@ -1,4 +1,5 @@
 import collections
+import functools
 import itertools
 
 import six
@@ -30,6 +31,13 @@ def sql_format_identifier(name):
     return '"{}"'.format(name)
 
 
+def is_flat_tuple(s):
+    return (
+        isinstance(s, tuple) and
+        all(not is_non_string_sequence(v) for v in s)
+    )
+
+
 def is_flat_two_tuple(s):
     return (
         isinstance(s, tuple) and
@@ -43,6 +51,10 @@ def is_non_string_sequence(s):
         isinstance(s, collections.Sequence) and
         not isinstance(s, six.string_types)
     )
+
+
+def is_partial_of(s, func):
+    return isinstance(s, functools.partial) and s.func is func
 
 
 def is_single_row(iterable):

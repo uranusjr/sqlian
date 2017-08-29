@@ -1,8 +1,14 @@
 import collections
 import functools
 
-from . import queries as q
+from . import (
+    clauses as c,
+    compositions as m,
+    expressions as e,
+    queries as q,
+)
 from .base import Sql, UnescapableError
+from .clauses import Clause
 from .utils import NativeRow, is_values_mapping_sequence, partition
 from .values import star
 
@@ -30,7 +36,7 @@ def _instantiate_query(query_klass, args, kwargs):
     param_cls = {key: klass for key, klass in query_klass.param_classes}
     native_args, clause_args = map(
         list,
-        partition(lambda arg: hasattr(arg, '__sql__'), args),
+        partition(lambda arg: isinstance(arg, Clause), args),
     )
 
     prepend_args = []
@@ -86,3 +92,30 @@ def update(*args, **kwargs):
 
 def delete(*args, **kwargs):
     return sql(_instantiate_query(q.Delete, args, kwargs))
+
+
+def join(join_item, on=None, using=None, join_type=''):
+    if on is not None and using is not None:
+        raise TypeError('cannot specify both "on" and "using" for join clause')
+
+    if on is not None:
+        on_using = c.On.parse(on)
+    elif using is not None:
+        on_using = c.Using.parse(using)
+    else:
+        on_using = None
+
+    return functools.partial(
+        m.Join,
+        join_type=join_type,
+        join_item=e.Ref.parse(join_item),
+        on_using=on_using,
+    )
+
+
+# Populate join.X variates based on possible join types.
+# Example: join.natural_cross('table', on={'x.a': 'table.a'})
+for join_type in m.ALLOWED_JOIN_TYPES:
+    name = join_type.lower().replace(' ', '_')
+    if name:
+        setattr(join, name, functools.partial(join, join_type=join_type))

@@ -12,11 +12,11 @@ class QueryError(ValueError):
 
 
 class DuplicateClauseError(QueryError):
-    error_template = 'duplicate {clause!r} clauses for query {query!r}'
+    error_template = 'duplicate {clause} clauses for query {query}'
 
 
 class InvalidClauseError(QueryError):
-    error_template = 'Query {query!r} does not accept clause {clause!r}'
+    error_template = 'Query {query} does not accept clause {clause}'
 
 
 class Query(Named):
