@@ -11,14 +11,14 @@ class Expression(Parsable):
     pass
 
 
-class Ref(Expression):
+class Identifier(Expression):
 
     def __init__(self, *qualified_parts):
-        super(Ref, self).__init__()
+        super(Identifier, self).__init__()
         self.qualified_parts = list(qualified_parts)
 
     def __repr__(self):
-        return 'Ref({})'.format(
+        return 'Id({})'.format(
             '.'.join(repr(p) for p in self.qualified_parts),
         )
 
@@ -36,7 +36,7 @@ class Ref(Expression):
     def parse_native(cls, value):
         if is_flat_two_tuple(value):
             exp, alias = value
-            return As(cls.parse(exp), Ref.parse(alias))
+            return As(cls.parse(exp), Identifier.parse(alias))
         return cls(*value.split('.'))
 
 

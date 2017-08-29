@@ -24,9 +24,9 @@ def test_select_locking():
     # option: 'NOWAIT' or 'SKIP LOCKED'
     query = q.Select(
         c.Select(f.Count(v.star)),
-        c.From(e.Ref('person')),
-        c.Where(e.Equal(e.Ref('person_id'), 1)),
-        c.Locking('update', e.Ref('person'), nowait=True),
+        c.From(e.Identifier('person')),
+        c.Where(e.Equal(e.Identifier('person_id'), 1)),
+        c.Locking('update', e.Identifier('person'), nowait=True),
     )
     assert sql(query) == (
         'SELECT * FROM "person" WHERE "person_id" = 1 '
@@ -37,8 +37,8 @@ def test_select_locking():
 def test_insert_returning():
     query = q.Insert(
         c.InsertInto(
-            c.Ref('person'),
-            m.List(c.Ref('person_id'), c.Ref('name')),
+            e.Identifier('person'),
+            m.List(e.Identifier('person_id'), e.Identifier('name')),
         ),
         c.Values(v.Value('mosky'), v.Value('Mosky Liu')),
         c.Returning(v.star),

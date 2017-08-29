@@ -5,7 +5,7 @@ import six
 from .base import Named, Parsable, Sql
 from .compositions import Assign, Join, List, Ordering
 from .expressions import (
-    And, Condition, Equal, In, Is, Ref, get_condition_classes,
+    And, Condition, Equal, Identifier, In, Is, get_condition_classes,
 )
 from .utils import (
     is_flat_tuple, is_flat_two_tuple, is_non_string_sequence,
@@ -44,14 +44,14 @@ class Clause(Named, Parsable):
         return cls(parsed)
 
 
-class RefClause(Clause):
+class IdentifierClause(Clause):
 
     def __init__(self, ref):
-        super(RefClause, self).__init__(ref)
+        super(IdentifierClause, self).__init__(ref)
 
     @classmethod
     def parse_native(cls, value):
-        return cls(Ref.parse(value))
+        return cls(Identifier.parse(value))
 
 
 class Select(Clause):
@@ -59,21 +59,21 @@ class Select(Clause):
     def parse_native(cls, value):
         # Special case: 2-string-tuple is AS instead of a sequence of columns.
         if is_flat_two_tuple(value):
-            return cls(Ref.parse(value))
+            return cls(Identifier.parse(value))
         if is_non_string_sequence(value):
-            return cls(*(Ref.parse(v) for v in value))
+            return cls(*(Identifier.parse(v) for v in value))
         if not isinstance(value, six.string_types):
             return cls(Value.parse(value))
-        return cls(Ref.parse(value))
+        return cls(Identifier.parse(value))
 
 
 def parse_from_argument(value):
     if is_flat_tuple(value) and all(callable(v) for v in value[1:]):
-        item = Ref.parse(value[0])
+        item = Identifier.parse(value[0])
         for v in value[1:]:
             item = v(item)
         return item
-    return Ref.parse(value)
+    return Identifier.parse(value)
 
 
 class From(Clause):
@@ -100,13 +100,13 @@ def parse_pair_as_condition(pair, rho_klass):
                 klass = condition_classes[str(klass).upper()]
             except KeyError:
                 raise ValueError('invalid operator {!r}'.format(klass))
-        return klass(Ref.parse(key), rho_klass.parse(value))
+        return klass(Identifier.parse(key), rho_klass.parse(value))
 
     # Parse in-key operator.
     for op, klass in condition_classes.items():
         if key.upper().endswith(' {}'.format(op)):
             return klass(
-                Ref.parse(rstrip_composition_suffix(key, op)),
+                Identifier.parse(rstrip_composition_suffix(key, op)),
                 rho_klass.parse(value),
             )
 
@@ -118,7 +118,7 @@ def parse_pair_as_condition(pair, rho_klass):
         klass = In
     else:
         klass = Equal
-    return klass(Ref.parse(key), parsed)
+    return klass(Identifier.parse(key), parsed)
 
 
 def parse_as_condition(value, rho_klass=Value):
@@ -144,7 +144,7 @@ class Where(Clause):
         return cls(parse_as_condition(value))
 
 
-class GroupBy(RefClause):
+class GroupBy(IdentifierClause):
     pass
 
 
@@ -153,18 +153,20 @@ class OrderBy(Clause):
     def parse_native(cls, value):
         # Parse explicit operator tuple.
         if is_flat_two_tuple(value):
-            return cls(Ordering(Ref.parse(value[0]), value[1]))
+            return cls(Ordering(Identifier.parse(value[0]), value[1]))
 
         # Parse in-key ordering.
         for ordering in Ordering.allowed_orderings:
             if value.upper().endswith(' {}'.format(ordering)):
                 return cls(Ordering(
-                    Ref.parse(rstrip_composition_suffix(value, ordering)),
+                    Identifier.parse(rstrip_composition_suffix(
+                        value, ordering,
+                    )),
                     ordering,
                 ))
 
         # Treat this like a ref name.
-        return cls(Ref.parse(value))
+        return cls(Identifier.parse(value))
 
 
 class Limit(Clause):
@@ -177,7 +179,7 @@ class Offset(Clause):
         super(Offset, self).__init__(value)
 
 
-class InsertInto(RefClause):
+class InsertInto(IdentifierClause):
     pass
 
 
@@ -192,7 +194,7 @@ class Columns(Clause):
 
     @classmethod
     def parse_native(cls, value):
-        return cls(List(*(Ref.parse(n) for n in value)))
+        return cls(List(*(Identifier.parse(n) for n in value)))
 
 
 class Values(Clause):
@@ -212,7 +214,7 @@ class Values(Clause):
         ))
 
 
-class Update(RefClause):
+class Update(IdentifierClause):
     pass
 
 
@@ -225,14 +227,14 @@ class Set(Clause):
             return cls(Value.parse(value))
         if is_single_row(value) and len(value) == 2:
             k, v = value
-            return cls(Assign(Ref.parse(k), Value.parse(v)))
+            return cls(Assign(Identifier.parse(k), Value.parse(v)))
         return cls(*(
-            Assign(Ref.parse(k), Value.parse(v))
+            Assign(Identifier.parse(k), Value.parse(v))
             for k, v in value
         ))
 
 
-class DeleteFrom(RefClause):
+class DeleteFrom(IdentifierClause):
     pass
 
 
@@ -243,7 +245,7 @@ class On(Clause):
 
     @classmethod
     def parse_native(cls, value):
-        return cls(parse_as_condition(value, rho_klass=Ref))
+        return cls(parse_as_condition(value, rho_klass=Identifier))
 
 
 class Using(Clause):
@@ -255,4 +257,4 @@ class Using(Clause):
     def parse_native(cls, value):
         if not is_non_string_sequence(value):
             value = [value]
-        return cls(List(*(Ref.parse(v) for v in value)))
+        return cls(List(*(Identifier.parse(v) for v in value)))

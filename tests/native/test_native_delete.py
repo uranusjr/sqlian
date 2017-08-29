@@ -1,4 +1,4 @@
-from sqlian import Ref, delete
+from sqlian import Identifier, delete
 
 
 def test_delete():
@@ -27,7 +27,7 @@ def test_delete_dict():
 
 
 def test_delete_native_where():
-    query = delete('person', where=(Ref('person_id') == 'mosky'))
+    query = delete('person', where=(Identifier('person_id') == 'mosky'))
     assert query == """
         DELETE FROM "person" WHERE "person_id" = 'mosky'
     """.strip()

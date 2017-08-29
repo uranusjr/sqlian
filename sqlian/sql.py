@@ -108,7 +108,7 @@ def join(join_item, on=None, using=None, join_type=''):
     return functools.partial(
         m.Join,
         join_type=join_type,
-        join_item=e.Ref.parse(join_item),
+        join_item=e.Identifier.parse(join_item),
         on_using=on_using,
     )
 

@@ -11,9 +11,9 @@ from sqlian import (
 
 def test_update():
     query = q.Update(
-        c.Update(e.Ref('person')),
-        c.Set(m.Assign(e.Ref('name'), v.Value('Mosky Liu'))),
-        c.Where(e.Equal(e.Ref('person_id'), v.Value('mosky'))),
+        c.Update(e.Identifier('person')),
+        c.Set(m.Assign(e.Identifier('name'), v.Value('Mosky Liu'))),
+        c.Where(e.Equal(e.Identifier('person_id'), v.Value('mosky'))),
     )
     assert sql(query) == """
         UPDATE "person" SET "name" = 'Mosky Liu' WHERE "person_id" = 'mosky'

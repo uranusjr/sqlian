@@ -1,6 +1,6 @@
 from . import clauses, compositions, expressions, functions, queries, values
 from .base import Named, Sql, UnescapableError
-from .expressions import Ref
+from .expressions import Identifier
 from .functions import Count
 from .sql import (
     sql,
@@ -19,7 +19,7 @@ __all__ = [
     'Sql', 'Named', 'UnescapableError',
 
     # Expressions.
-    'Ref', 'Value', 'star',
+    'Identifier', 'Value', 'star',
 
     # Functions.
     'Count',
