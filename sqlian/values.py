@@ -1,4 +1,5 @@
 import numbers
+import re
 
 import six
 
@@ -32,6 +33,19 @@ star = Constant('*')
 
 true = Constant('TRUE')
 false = Constant('FALSE')
+
+
+class Parameter(object):
+
+    def __init__(self, name):
+        super(Parameter, self).__init__()
+        self.name = name
+
+    def __repr__(self):
+        return '<Param %({})s>'.format(self.name)
+
+    def __sql__(self):
+        return Sql('%({})s'.format(self.name))
 
 
 class Value(Parsable):

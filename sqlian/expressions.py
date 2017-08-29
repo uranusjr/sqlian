@@ -40,19 +40,6 @@ class Ref(Expression):
         return cls(*value.split('.'))
 
 
-class Param(Expression):
-
-    def __init__(self, name):
-        super(Param, self).__init__()
-        self.name = name
-
-    def __repr__(self):
-        return '<Param %({})s>'.format(self.name)
-
-    def __sql__(self):
-        return Sql('%({})s'.format(self.name))
-
-
 class Condition(Expression):
     """Condition is a specialized expression that evaluates to a boolean.
     """

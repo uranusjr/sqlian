@@ -145,9 +145,9 @@ def test_select_order_by_desc_parse():
     """.strip()
 
 
-@pytest.mark.skip(reason='Need more thought how to do native param well.')
+@pytest.mark.xfail(reason='Need more thought how to do native param well.')
 def test_select_param():
-    query = select()
+    query = select(from_='table', where={})
     assert query == (
         'SELECT * FROM "table" '
         'WHERE "auto_param" = %(auto_param)s '

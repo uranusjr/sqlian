@@ -140,9 +140,9 @@ def test_select_param():
         c.Select(v.star),
         c.From(e.Ref('table')),
         c.Where(e.And(
-            e.Equal(e.Ref('auto_param'), e.Param('auto_param')),
-            e.Equal(e.Ref('using_alias'), e.Param('using_alias')),
-            e.Equal(e.Ref('custom_param'), e.Param('my_param')),
+            e.Equal(e.Ref('auto_param'), v.Parameter('auto_param')),
+            e.Equal(e.Ref('using_alias'), v.Parameter('using_alias')),
+            e.Equal(e.Ref('custom_param'), v.Parameter('my_param')),
         )),
     )
     assert sql(query) == (
