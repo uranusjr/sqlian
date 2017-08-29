@@ -88,9 +88,8 @@ class From(Clause):
         return cls(parse_from_argument(value))
 
 
-def parse_pair_as_condition(pair, default_ref):
+def parse_pair_as_condition(pair, rho_klass):
     key, value = pair
-    value_klass = Ref if default_ref else Value
     condition_classes = get_condition_classes()
 
     # Explicit tuple operator.
@@ -101,18 +100,18 @@ def parse_pair_as_condition(pair, default_ref):
                 klass = condition_classes[str(klass).upper()]
             except KeyError:
                 raise ValueError('invalid operator {!r}'.format(klass))
-        return klass(Ref.parse(key), value_klass.parse(value))
+        return klass(Ref.parse(key), rho_klass.parse(value))
 
     # Parse in-key operator.
     for op, klass in condition_classes.items():
         if key.upper().endswith(' {}'.format(op)):
             return klass(
                 Ref.parse(rstrip_composition_suffix(key, op)),
-                value_klass.parse(value),
+                rho_klass.parse(value),
             )
 
     # Auto-detect operator based on right-hand value.
-    parsed = value_klass.parse(value)
+    parsed = rho_klass.parse(value)
     if parsed is null:
         klass = Is
     elif isinstance(parsed, List):
@@ -122,15 +121,15 @@ def parse_pair_as_condition(pair, default_ref):
     return klass(Ref.parse(key), parsed)
 
 
-def parse_as_condition(value, default_ref=False):
+def parse_as_condition(value, rho_klass=Value):
     if isinstance(value, collections.Mapping):
         value = value.items()
     elif not isinstance(value, collections.Sequence):
         return Value.parse(value)
     if is_single_row(value) and len(value) == 2:
-        return parse_pair_as_condition(value, default_ref=default_ref)
+        return parse_pair_as_condition(value, rho_klass=rho_klass)
     return And(*(
-        parse_pair_as_condition((key, value), default_ref=default_ref)
+        parse_pair_as_condition((key, value), rho_klass=rho_klass)
         for key, value in value
     ))
 
@@ -244,7 +243,7 @@ class On(Clause):
 
     @classmethod
     def parse_native(cls, value):
-        return cls(parse_as_condition(value, default_ref=True))
+        return cls(parse_as_condition(value, rho_klass=Ref))
 
 
 class Using(Clause):
