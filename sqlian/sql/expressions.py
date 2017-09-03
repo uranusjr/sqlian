@@ -1,13 +1,9 @@
-import inspect
+import collections
 
-from . import compat
-from .base import Parsable, Sql
-from .compositions import As
-from .utils import is_flat_two_tuple, sql_format_identifier
-from .values import Value, null
+from sqlian import Sql
 
 
-class Expression(Parsable):
+class Expression(object):
     pass
 
 
@@ -22,27 +18,18 @@ class Identifier(Expression):
             '.'.join(repr(p) for p in self.qualified_parts),
         )
 
-    def __sql__(self):
+    def __sql__(self, engine):
         return Sql('.').join(
-            Sql(sql_format_identifier(p)) for p in self.qualified_parts
+            Sql(engine.format_identifier(p))
+            for p in self.qualified_parts
         )
-
-    def __eq__(self, operand):
-        if operand is null:
-            return Is(self, null)
-        return Equal(self, Value.parse(operand))
-
-    @classmethod
-    def parse_native(cls, value):
-        if is_flat_two_tuple(value):
-            exp, alias = value
-            return As(cls.parse(exp), Identifier.parse(alias))
-        return cls(*value.split('.'))
 
 
 class Condition(Expression):
     """Condition is a specialized expression that evaluates to a boolean.
     """
+    alt_operators = {}
+
     def __init__(self, *ps):
         self.operands = ps
 
@@ -54,24 +41,32 @@ class Condition(Expression):
 
 
 class Infix(Condition):
-    def __sql__(self):
-        return Sql(' {} '.format(self.operator)).join(self.operands)
 
+    def __init__(self, lho, rho):
+        super(Infix, self).__init__(lho, rho)
 
-class Is(Infix):
-    operator = 'IS'
-
-
-class IsNot(Infix):
-    operator = 'IS NOT'
+    def __sql__(self, engine):
+        it = iter(self.operands)
+        parts = [engine.format_value(next(it))]
+        for op in it:
+            parts.append(Sql(
+                self.alt_operators[op]
+                if (isinstance(op, collections.Hashable) and
+                    op in self.alt_operators)
+                else self.operator
+            ))
+            parts.append(engine.format_value(op))
+        return Sql(' '.join(parts))
 
 
 class Equal(Infix):
     operator = '='
+    alt_operators = {None: 'IS'}
 
 
 class NotEqual(Infix):
     operator = '!='
+    alt_operators = {None: 'IS NOT'}
 
 
 class GreaterThan(Infix):
@@ -102,9 +97,5 @@ class And(Infix):
     operator = 'AND'
 
 
-@compat.lru_cache(maxsize=1)
-def get_condition_classes():
-    return {
-        value.operator: value for value in globals().values()
-        if inspect.isclass(value) and hasattr(value, 'operator')
-    }
+class Or(Infix):
+    operator = 'OR'
