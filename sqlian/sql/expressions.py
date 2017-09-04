@@ -1,6 +1,7 @@
 import collections
+import inspect
 
-from sqlian import Sql
+from sqlian import compat, Sql
 
 
 class Expression(object):
@@ -99,3 +100,11 @@ class And(Infix):
 
 class Or(Infix):
     operator = 'OR'
+
+
+@compat.lru_cache(maxsize=1)
+def get_condition_classes():
+    return {
+        value.operator: value for value in globals().values()
+        if inspect.isclass(value) and hasattr(value, 'operator')
+    }

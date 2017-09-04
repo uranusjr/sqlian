@@ -28,5 +28,5 @@ def test_equal(engine):
 
 
 def test_not_equal(engine):
-    sql = e.NotEqual(e.Identifier('foo', 'bar'), 'mosky')
-    assert sql.__sql__(engine) == Sql('"foo"."bar" != ' + "'mosky'"), sql
+    sql = e.NotEqual(e.Identifier('person', 'name'), 'Mosky')
+    assert sql.__sql__(engine) == Sql('"person"."name" != ' + "'Mosky'"), sql
