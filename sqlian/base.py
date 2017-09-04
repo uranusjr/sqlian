@@ -12,6 +12,10 @@ class Sql(six.text_type):
     """A SQL string.
     """
     def __new__(cls, base=u''):
+        try:
+            base = base.strip()
+        except AttributeError:
+            pass
         return super(Sql, cls).__new__(cls, base)
 
     def __repr__(self):

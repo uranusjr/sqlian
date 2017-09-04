@@ -14,10 +14,28 @@ def ensure_sql(f):
         result = f(*args, **kwargs)
         return result if isinstance(result, Sql) else Sql(result)
 
+    wrapped.__sql_ensured__ = True
     return wrapped
 
 
-class StandardEngine(object):
+class EngineMeta(type):
+    """Metaclass to ensure ``as_sql`` returns a ``Sql`` instance.
+    """
+    def __new__(meta, name, bases, attrdict):
+        if 'as_sql' in attrdict:
+            as_sql = attrdict['as_sql']
+            if not getattr(as_sql, '__sql_ensured__', False):
+                attrdict['as_sql'] = ensure_sql(as_sql)
+        return super(EngineMeta, meta).__new__(meta, name, bases, attrdict)
+
+
+@six.add_metaclass(EngineMeta)
+class Engine(object):
+    """An engine that does nothing.
+    """
+
+
+class StandardEngine(Engine):
     """Engine that emits ANSI-compliant SQL.
     """
     def format_star(self):
@@ -37,19 +55,20 @@ class StandardEngine(object):
         return "'{}'".format(value)
 
     @ensure_sql
-    def format_value(self, value):
+    def as_sql(self, value):
         if value is None:
             return self.format_null()
         if value is star:
             return self.format_star()
+        if hasattr(value, '__sql__'):
+            return value.__sql__(self)
         if isinstance(value, numbers.Number):
             return self.format_number(value)
         if isinstance(value, six.binary_type):
             return self.format_string(value.decode('utf-8'))
         if isinstance(value, six.text_type):
             return self.format_string(value)
-        if hasattr(value, '__sql__'):
-            return value.__sql__(self)
+
         raise UnescapableError(value)
 
     def format_identifier(self, name):

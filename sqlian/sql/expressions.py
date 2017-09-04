@@ -48,7 +48,7 @@ class Infix(Condition):
 
     def __sql__(self, engine):
         it = iter(self.operands)
-        parts = [engine.format_value(next(it))]
+        parts = [engine.as_sql(next(it))]
         for op in it:
             parts.append(Sql(
                 self.alt_operators[op]
@@ -56,7 +56,7 @@ class Infix(Condition):
                     op in self.alt_operators)
                 else self.operator
             ))
-            parts.append(engine.format_value(op))
+            parts.append(engine.as_sql(op))
         return Sql(' '.join(parts))
 
 
