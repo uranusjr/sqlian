@@ -15,7 +15,7 @@ class Function(Expression):
         )
 
     def __sql__(self, engine):
-        return Sql('{}({})').format(self.sql_name, Sql(', ').join(
+        return Sql('{}({})').format(Sql(self.sql_name), Sql(', ').join(
             engine.as_sql(v) for v in self.args
         ))
 
@@ -24,5 +24,6 @@ class Count(Function):
 
     sql_name = 'COUNT'
 
-    def __init__(self, expression):
-        super(Count, self).__init__(expression)
+    def __init__(self, expression=None):
+        args = [] if expression is None else [expression]
+        super(Count, self).__init__(*args)

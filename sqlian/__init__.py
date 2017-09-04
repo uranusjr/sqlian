@@ -1,8 +1,8 @@
-from .base import Sql, UnescapableError
+from .base import Sql, UnescapableError, UnsupportedParameterError
 from .constants import star
 
 
 __all__ = [
-    'Sql', 'UnescapableError',
+    'Sql', 'UnescapableError', 'UnsupportedParameterError',
     'star',
 ]

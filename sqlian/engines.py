@@ -18,14 +18,21 @@ def ensure_sql(f):
     return wrapped
 
 
+def ensure_sql_wrapped(func):
+    if getattr(func, '__sql_ensured__', False):
+        return func
+    return ensure_sql(func)
+
+
 class EngineMeta(type):
-    """Metaclass to ensure ``as_sql`` returns a ``Sql`` instance.
+    """Metaclass to ensure formatter methods return a ``Sql`` instance.
     """
     def __new__(meta, name, bases, attrdict):
         if 'as_sql' in attrdict:
-            as_sql = attrdict['as_sql']
-            if not getattr(as_sql, '__sql_ensured__', False):
-                attrdict['as_sql'] = ensure_sql(as_sql)
+            attrdict['as_sql'] = ensure_sql_wrapped(attrdict['as_sql'])
+        for key in list(six.iterkeys(attrdict)):
+            if key.startswith('format_'):
+                attrdict[key] = ensure_sql_wrapped(attrdict[key])
         return super(EngineMeta, meta).__new__(meta, name, bases, attrdict)
 
 
@@ -44,6 +51,9 @@ class StandardEngine(Engine):
     def format_null(self):
         return 'NULL'
 
+    def format_boolean(self, value):
+        return {True: 'TRUE', False: 'FALSE'}[value]
+
     def format_number(self, value):
         return str(value)
 
@@ -54,7 +64,6 @@ class StandardEngine(Engine):
             raise ValueError('null character in string')
         return "'{}'".format(value)
 
-    @ensure_sql
     def as_sql(self, value):
         if value is None:
             return self.format_null()
@@ -62,6 +71,8 @@ class StandardEngine(Engine):
             return self.format_star()
         if hasattr(value, '__sql__'):
             return value.__sql__(self)
+        if isinstance(value, bool):
+            return self.format_boolean(value)
         if isinstance(value, numbers.Number):
             return self.format_number(value)
         if isinstance(value, six.binary_type):

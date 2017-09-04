@@ -1,4 +1,4 @@
-from sqlian import Sql
+from sqlian import Sql, UnsupportedParameterError
 
 
 class Composition(object):
@@ -24,5 +24,90 @@ class As(Composition):
     def __sql__(self, engine):
         return Sql('{} AS {}').format(
             engine.as_sql(self.expression),
-            engine.format_identifier(self.alias),
+            engine.as_sql(self.alias),
         )
+
+
+class Ordering(Composition):
+
+    allowed_orderings = ['ASC', 'DESC']
+
+    def __init__(self, expression, order):
+        super(Ordering, self).__init__(expression, order)
+        if order.upper() not in self.allowed_orderings:
+            raise UnsupportedParameterError(order, 'ordering')
+        self.expression = expression
+        self.order = order.upper()
+
+    def __sql__(self, engine):
+        return Sql('{} {}').format(
+            engine.as_sql(self.expression),
+            Sql(self.order),
+        )
+
+
+class List(Composition):
+    def __sql__(self, engine):
+        return Sql('({})').format(Sql(', ').join(
+            engine.as_sql(a) for a in self.args
+        ))
+
+
+class Assign(Composition):
+
+    def __init__(self, lho, rho):
+        super(Assign, self).__init__(lho, rho)
+        self.lho = lho
+        self.rho = rho
+
+    def __sql__(self, engine):
+        return Sql('{} = {}').format(
+            engine.as_sql(self.lho),
+            engine.as_sql(self.rho),
+        )
+
+
+ALLOWED_JOIN_TYPES = {
+    '',
+    'INNER',
+    'LEFT',
+    'LEFT OUTER',
+    'RIGHT',
+    'RIGHT OUTER',
+    'FULL',
+    'FULL OUTER',
+    'CROSS',
+
+    'NATURAL',
+    'NATURAL INNER',
+    'NATURAL LEFT',
+    'NATURAL LEFT OUTER',
+    'NATURAL RIGHT',
+    'NATURAL RIGHT OUTER',
+    'NATURAL FULL',
+    'NATURAL FULL OUTER',
+    'NATURAL CROSS',
+}
+
+
+class Join(Composition):
+
+    sql_name = 'JOIN'
+
+    def __init__(self, item, join_type, join_item, on_using=None):
+        super(Join, self).__init__(item, join_type, join_item, on_using)
+        if join_type.upper() not in ALLOWED_JOIN_TYPES:
+            raise UnsupportedParameterError(join_type, 'join type')
+        self.item = item
+        self.join_type = join_type.upper()
+        self.join_item = join_item
+        self.on_using = on_using
+
+    def __sql__(self, engine):
+        parts = [engine.as_sql(self.item)]
+        if self.join_type:
+            parts.append(Sql(self.join_type))
+        parts += [Sql(self.sql_name), engine.as_sql(self.join_item)]
+        if self.on_using is not None:
+            parts.append(engine.as_sql(self.on_using))
+        return Sql(' ').join(parts)
