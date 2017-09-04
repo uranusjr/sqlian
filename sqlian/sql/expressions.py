@@ -26,6 +26,19 @@ class Identifier(Expression):
         )
 
 
+class Parameter(Expression):
+
+    def __init__(self, name):
+        super(Parameter, self).__init__()
+        self.name = name
+
+    def __repr__(self):
+        return 'Param({})'.format(self.name)
+
+    def __sql__(self, engine):
+        return Sql('%({})s'.format(self.name))
+
+
 class Condition(Expression):
     """Condition is a specialized expression that evaluates to a boolean.
     """

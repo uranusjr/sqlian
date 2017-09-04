@@ -14,10 +14,10 @@ class Clause(object):
         )
 
     def __sql__(self, engine):
-        return Sql('{} {}').format(
-            Sql(self.sql_name),
-            Sql(', ').join(engine.as_value(c) for c in self.children),
-        )
+        arg_sql = Sql(', ').join(engine.as_value(c) for c in self.children)
+        if not self.sql_name:
+            return arg_sql
+        return Sql('{} {}').format(Sql(self.sql_name), arg_sql)
 
 
 class Select(Clause):
@@ -53,7 +53,7 @@ class InsertInto(Clause):
 
 
 class Columns(Clause):
-    sql_name = 'COLUMNS'
+    sql_name = ''
 
 
 class Values(Clause):
