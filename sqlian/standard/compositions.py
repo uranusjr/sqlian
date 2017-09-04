@@ -33,11 +33,12 @@ class Ordering(Composition):
     allowed_orderings = ['ASC', 'DESC']
 
     def __init__(self, expression, order):
-        super(Ordering, self).__init__(expression, order)
-        if order.upper() not in self.allowed_orderings:
+        order_upper = order.upper()
+        super(Ordering, self).__init__(expression, order_upper)
+        if order_upper not in self.allowed_orderings:
             raise UnsupportedParameterError(order, 'ordering')
         self.expression = expression
-        self.order = order.upper()
+        self.order = order_upper
 
     def __sql__(self, engine):
         return Sql('{} {}').format(
@@ -95,11 +96,12 @@ class Join(Composition):
     sql_name = 'JOIN'
 
     def __init__(self, item, join_type, join_item, on_using=None):
-        super(Join, self).__init__(item, join_type, join_item, on_using)
+        join_type_upper = join_type.upper()
+        super(Join, self).__init__(item, join_type_upper, join_item, on_using)
         if join_type.upper() not in ALLOWED_JOIN_TYPES:
             raise UnsupportedParameterError(join_type, 'join type')
         self.item = item
-        self.join_type = join_type.upper()
+        self.join_type = join_type_upper
         self.join_item = join_item
         self.on_using = on_using
 

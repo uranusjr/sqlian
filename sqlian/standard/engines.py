@@ -16,7 +16,9 @@ from sqlian.engines import (
 class Engine(BaseEngine):
     """Engine that emits ANSI-compliant SQL.
     """
-    from . import clauses, compositions, constants, expressions, queries
+    from . import (
+        clauses, compositions, constants, expressions, functions, queries,
+    )
 
     identifier_quote = '"'
     string_quote = "'"
@@ -37,16 +39,22 @@ class Engine(BaseEngine):
     def format_number(self, value):
         return str(value)
 
-    def format_identifier(self, name):
-        # TODO: Escape special characters?
-        return '{0}{1}{0}'.format(self.identifier_quote, name)
+    def escape_string(self, value):
+        # SQL standard: replace quotes with pairs of them.
+        return value.replace(self.string_quote, self.string_quote * 2)
 
     def format_string(self, value):
+        return "{0}{1}{0}".format(self.string_quote, self.escape_string(value))
+
+    def escape_identifier(self, name):
         # SQL standard: replace quotes with pairs of them.
-        value = value.replace(self.string_quote, self.string_quote * 2)
-        if '\0' in value:   # TODO: Is there a good way to handle this?
-            raise ValueError('null character in string')
-        return "{0}{1}{0}".format(self.string_quote, value)
+        return name.replace(self.identifier_quote, self.identifier_quote * 2)
+
+    def format_identifier(self, name):
+        return '{0}{1}{0}'.format(
+            self.identifier_quote,
+            self.escape_identifier(name),
+        )
 
     # "Smart" methods: Call these to format a given object to SQL.
 
