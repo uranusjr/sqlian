@@ -1,11 +1,31 @@
 import collections
 import inspect
 
-from sqlian import compat, Sql
+from sqlian import compat, Parsable, Sql
+from sqlian.utils import is_flat_two_tuple
+
+from .compositions import As
 
 
-class Expression(object):
+class Expression(Parsable):
     pass
+
+
+class Value(Expression):
+    """Wrapper for a plain value.
+
+    This is useful when a native value is parsed as an identifier by default.
+    Wrap your variable inside this class to declare it as a value explicitly.
+    """
+    def __init__(self, wrapped):
+        super(Value, self).__init__()
+        self.wrapped = wrapped
+
+    def __repr__(self):
+        return 'Value({!r})'.format(self.wrapped)
+
+    def __sql__(self, engine):
+        return engine.as_value(self.wrapped)
 
 
 class Identifier(Expression):
@@ -24,6 +44,19 @@ class Identifier(Expression):
             Sql(engine.as_identifier(p))
             for p in self.qualified_parts
         )
+
+    @classmethod
+    def parse_native(cls, value, engine):
+        if is_flat_two_tuple(value):
+            exp, alias = value
+            return As(cls.parse(exp), Identifier.parse(alias))
+        return cls(*(
+            part[1:-1] if (
+                part.startswith(engine.identifier_quote) and
+                part.endsswith(engine.identifier_quote)
+            ) else part
+            for part in value.split('.')
+        ))
 
 
 class Parameter(Expression):
