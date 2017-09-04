@@ -2,7 +2,8 @@ import functools
 
 import six
 
-from sqlian import compat, Clause, Sql
+from sqlian import compat, Sql
+from sqlian.sql import Clause
 from sqlian.utils import partition
 
 
