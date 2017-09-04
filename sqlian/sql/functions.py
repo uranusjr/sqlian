@@ -16,14 +16,13 @@ class Function(Expression):
 
     def __sql__(self, engine):
         return Sql('{}({})').format(Sql(self.sql_name), Sql(', ').join(
-            engine.as_sql(v) for v in self.args
+            engine.as_value(v) for v in self.args
         ))
 
 
 class Count(Function):
-
     sql_name = 'COUNT'
 
-    def __init__(self, expression=None):
-        args = [] if expression is None else [expression]
-        super(Count, self).__init__(*args)
+
+class Sum(Function):
+    sql_name = 'SUM'

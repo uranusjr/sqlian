@@ -21,7 +21,7 @@ class Identifier(Expression):
 
     def __sql__(self, engine):
         return Sql('.').join(
-            Sql(engine.format_identifier(p))
+            Sql(engine.as_identifier(p))
             for p in self.qualified_parts
         )
 
@@ -42,13 +42,9 @@ class Condition(Expression):
 
 
 class Infix(Condition):
-
-    def __init__(self, lho, rho):
-        super(Infix, self).__init__(lho, rho)
-
     def __sql__(self, engine):
         it = iter(self.operands)
-        parts = [engine.as_sql(next(it))]
+        parts = [engine.as_value(next(it))]
         for op in it:
             parts.append(Sql(
                 self.alt_operators[op]
@@ -56,7 +52,7 @@ class Infix(Condition):
                     op in self.alt_operators)
                 else self.operator
             ))
-            parts.append(engine.as_sql(op))
+            parts.append(engine.as_value(op))
         return Sql(' '.join(parts))
 
 
@@ -100,6 +96,22 @@ class And(Infix):
 
 class Or(Infix):
     operator = 'OR'
+
+
+class Add(Infix):
+    operator = '+'
+
+
+class Substract(Infix):
+    operator = '-'
+
+
+class Multiply(Infix):
+    operator = '*'
+
+
+class Divide(Infix):
+    operator = '/'
 
 
 @compat.lru_cache(maxsize=1)

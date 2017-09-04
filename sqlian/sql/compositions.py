@@ -23,8 +23,8 @@ class As(Composition):
 
     def __sql__(self, engine):
         return Sql('{} AS {}').format(
-            engine.as_sql(self.expression),
-            engine.as_sql(self.alias),
+            engine.as_value(self.expression),
+            engine.as_value(self.alias),
         )
 
 
@@ -41,7 +41,7 @@ class Ordering(Composition):
 
     def __sql__(self, engine):
         return Sql('{} {}').format(
-            engine.as_sql(self.expression),
+            engine.as_value(self.expression),
             Sql(self.order),
         )
 
@@ -49,7 +49,7 @@ class Ordering(Composition):
 class List(Composition):
     def __sql__(self, engine):
         return Sql('({})').format(Sql(', ').join(
-            engine.as_sql(a) for a in self.args
+            engine.as_value(a) for a in self.args
         ))
 
 
@@ -62,8 +62,8 @@ class Assign(Composition):
 
     def __sql__(self, engine):
         return Sql('{} = {}').format(
-            engine.as_sql(self.lho),
-            engine.as_sql(self.rho),
+            engine.as_value(self.lho),
+            engine.as_value(self.rho),
         )
 
 
@@ -104,10 +104,10 @@ class Join(Composition):
         self.on_using = on_using
 
     def __sql__(self, engine):
-        parts = [engine.as_sql(self.item)]
+        parts = [engine.as_value(self.item)]
         if self.join_type:
             parts.append(Sql(self.join_type))
-        parts += [Sql(self.sql_name), engine.as_sql(self.join_item)]
+        parts += [Sql(self.sql_name), engine.as_value(self.join_item)]
         if self.on_using is not None:
-            parts.append(engine.as_sql(self.on_using))
+            parts.append(engine.as_value(self.on_using))
         return Sql(' ').join(parts)

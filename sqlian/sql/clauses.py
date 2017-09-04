@@ -16,7 +16,7 @@ class Clause(object):
     def __sql__(self, engine):
         return Sql('{} {}').format(
             Sql(self.sql_name),
-            Sql(', ').join(engine.as_sql(c) for c in self.children),
+            Sql(', ').join(engine.as_value(c) for c in self.children),
         )
 
 

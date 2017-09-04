@@ -28,10 +28,8 @@ class EngineMeta(type):
     """Metaclass to ensure formatter methods return a ``Sql`` instance.
     """
     def __new__(meta, name, bases, attrdict):
-        if 'as_sql' in attrdict:
-            attrdict['as_sql'] = ensure_sql_wrapped(attrdict['as_sql'])
         for key in list(six.iterkeys(attrdict)):
-            if key.startswith('format_'):
+            if key.startswith('format_') or key.startswith('as_'):
                 attrdict[key] = ensure_sql_wrapped(attrdict[key])
         return super(EngineMeta, meta).__new__(meta, name, bases, attrdict)
 
@@ -57,6 +55,10 @@ class StandardEngine(Engine):
     def format_number(self, value):
         return str(value)
 
+    def format_identifier(self, name):
+        # TODO: Escape special characters?
+        return '"{}"'.format(name)
+
     def format_string(self, value):
         # SQL standard: replace single quotes with pairs of them.
         value = value.replace("'", "''")
@@ -64,7 +66,7 @@ class StandardEngine(Engine):
             raise ValueError('null character in string')
         return "'{}'".format(value)
 
-    def as_sql(self, value):
+    def as_value(self, value):
         if value is None:
             return self.format_null()
         if value is star:
@@ -79,9 +81,17 @@ class StandardEngine(Engine):
             return self.format_string(value.decode('utf-8'))
         if isinstance(value, six.text_type):
             return self.format_string(value)
-
         raise UnescapableError(value)
 
-    def format_identifier(self, name):
-        # TODO: Escape special characters?
-        return '"{}"'.format(name)
+    def as_identifier(self, name):
+        if name is None:
+            return self.format_null()
+        if name is star:
+            return self.format_star()
+        if hasattr(name, '__sql__'):
+            return name.__sql__(self)
+        if isinstance(name, six.binary_type):
+            return self.format_identifier(name.decode('utf-8'))
+        if isinstance(name, six.text_type):
+            return self.format_identifier(name)
+        raise UnescapableError(name)
