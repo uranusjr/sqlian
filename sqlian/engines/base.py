@@ -61,6 +61,27 @@ def query_builder(f):
     return wrapped
 
 
+class Join(object):
+    """Pxory callable for Engine.join() with sub-callables.
+
+    Attributes on this callable object represent join variants.
+    """
+    def __init__(self, engine, join_f, join_types):
+        super(Join, self).__init__()
+        self.join_f = join_f
+
+        # Populate join variants based on possible join types.
+        # Example: join.natural_cross('table', on={'x.a': 'table.a'})
+        for join_type in join_types:
+            name = join_type.lower().replace(' ', '_')
+            setattr(self, name, functools.partial(
+                join_f, engine, join_type=join_type,
+            ))
+
+    def __call__(self, *args, **kwargs):
+        return self.join_f(*args, **kwargs)
+
+
 class EngineMeta(type):
     def __new__(meta, name, bases, attrdict):
         # Ensure formatter methods return a ``Sql`` instance.
@@ -76,14 +97,10 @@ class Engine(object):
     """
     def __init__(self):
         super(Engine, self).__init__()
-        # Populate join variants based on possible join types.
-        # Example: join.natural_cross('table', on={'x.a': 'table.a'})
+        # Replace the join method with a proxy callable, and set
+        # sub-callables on it.
         with compat.suppress(AttributeError):
-            join_f = type(self).join
-            for join_type in self.compositions.ALLOWED_JOIN_TYPES:
-                if not join_type:
-                    continue
-                name = join_type.lower().replace(' ', '_')
-                setattr(join_f, name, functools.partial(
-                    join_f, self, join_type=join_type,
-                ))
+            self.join = Join(
+                self, type(self).join,
+                (t for t in self.compositions.ALLOWED_JOIN_TYPES if t),
+            )

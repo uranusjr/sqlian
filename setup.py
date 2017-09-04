@@ -16,7 +16,8 @@ def get_version():
         for line in f:
             if line.startswith('VERSION'):
                 code = line[len('VERSION = '):]
-    return '.'.join([str(c) for c in eval(code)])
+                break
+    return '{}.{}.{}-{}'.format(*eval(code))
 
 
 # readme = open('README.rst').read()

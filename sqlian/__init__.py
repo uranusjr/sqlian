@@ -10,3 +10,8 @@ __all__ = [
     'Sql', 'UnescapableError', 'UnsupportedParameterError',
     'star',
 ]
+
+
+VERSION = (0, 1, 0, 'dev')
+
+__version__ = '{}.{}.{}-{}'.format(*VERSION)
