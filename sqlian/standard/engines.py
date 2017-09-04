@@ -4,10 +4,10 @@ import numbers
 
 import six
 
-from sqlian import NativeRow, UnescapableError, star
+from sqlian import NativeRow, UnescapableError
 from sqlian.utils import is_values_mapping_sequence
 
-from .base import (
+from sqlian.engines import (
     Engine as BaseEngine,
     query_builder,
 )
@@ -16,10 +16,12 @@ from .base import (
 class Engine(BaseEngine):
     """Engine that emits ANSI-compliant SQL.
     """
-    from sqlian.sql import clauses, compositions, expressions, queries
+    from . import clauses, compositions, constants, expressions, queries
 
     identifier_quote = '"'
     string_quote = "'"
+
+    star = constants.star
 
     # Formatter methods: Override to format things of a certain type to SQL.
 
@@ -51,7 +53,7 @@ class Engine(BaseEngine):
     def as_value(self, value):
         if value is None:
             return self.format_null()
-        if value is star:
+        if value is self.star:
             return self.format_star()
         if hasattr(value, '__sql__'):
             return value.__sql__(self)
@@ -68,7 +70,7 @@ class Engine(BaseEngine):
     def as_identifier(self, name):
         if name is None:
             return self.format_null()
-        if name is star:
+        if name is self.star:
             return self.format_star()
         if hasattr(name, '__sql__'):
             return name.__sql__(self)
@@ -88,7 +90,7 @@ class Engine(BaseEngine):
     @query_builder
     def select(self, *args, **kwargs):
         if not args and 'select' not in kwargs:
-            kwargs['select'] = star
+            kwargs['select'] = self.star
         return self.queries.Select, args, kwargs
 
     @query_builder

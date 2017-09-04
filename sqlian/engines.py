@@ -2,9 +2,10 @@ import functools
 
 import six
 
-from sqlian import compat, Sql
-from sqlian.sql import Clause
-from sqlian.utils import partition
+from . import compat
+from .base import Sql
+from .standard import Clause
+from .utils import partition
 
 
 def ensure_sql(f):

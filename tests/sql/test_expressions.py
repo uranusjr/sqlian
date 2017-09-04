@@ -1,5 +1,5 @@
 from sqlian import Sql
-from sqlian.sql import expressions as e
+from sqlian.standard import expressions as e
 
 
 def test_identifier(engine):

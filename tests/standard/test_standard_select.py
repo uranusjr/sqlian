@@ -1,7 +1,7 @@
 import pytest
 
-from sqlian import Sql, star
-from sqlian.sql import Count, Value
+from sqlian import Sql
+from sqlian.standard import Count, Value, star
 
 
 def test_select_where_equal(engine):

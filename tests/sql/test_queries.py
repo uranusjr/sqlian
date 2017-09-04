@@ -1,7 +1,8 @@
-from sqlian import Sql, star
-from sqlian.sql import (
+from sqlian import Sql
+from sqlian.standard import (
     clauses as c,
     compositions as m,
+    constants as n,
     expressions as e,
     functions as f,
     queries as q,
@@ -44,7 +45,7 @@ def test_select_where_condition(engine):
 def test_select_where_subquery_as(engine):
     sql = q.Select(
         c.Select(
-            e.Identifier('t', star),
+            e.Identifier('t', n.star),
             m.As(e.Add(e.Identifier('a'), e.Identifier('b')),
                  e.Identifier('total')),
         ),

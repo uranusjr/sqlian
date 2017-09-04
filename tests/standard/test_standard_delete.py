@@ -1,5 +1,5 @@
 from sqlian import Sql
-from sqlian.sql import Identifier, Equal
+from sqlian.standard import Identifier, Equal
 
 
 def test_delete(engine):

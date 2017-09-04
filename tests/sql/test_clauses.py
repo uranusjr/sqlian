@@ -1,7 +1,8 @@
-from sqlian import Sql, star
-from sqlian.sql import (
+from sqlian import Sql
+from sqlian.standard import (
     clauses as c,
     compositions as m,
+    constants as n,
     expressions as e,
     functions as f,
 )
@@ -13,7 +14,7 @@ def test_select(engine):
 
 
 def test_select_star(engine):
-    sql = c.Select(star)
+    sql = c.Select(n.star)
     assert sql.__sql__(engine) == Sql('SELECT *')
 
 

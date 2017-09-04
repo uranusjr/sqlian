@@ -1,5 +1,6 @@
-from sqlian import Sql, star
-from sqlian.sql import (
+from sqlian import Sql
+from sqlian.standard import (
+    constants as n,
     expressions as e,
     functions as f,
 )
@@ -11,7 +12,7 @@ def test_count(engine):
 
 
 def test_count_star(engine):
-    sql = f.Count(star)
+    sql = f.Count(n.star)
     assert sql.__sql__(engine) == Sql('COUNT(*)'), sql
 
 

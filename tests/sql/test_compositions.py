@@ -1,8 +1,9 @@
 import pytest
 
-from sqlian import Sql, UnsupportedParameterError, star
-from sqlian.sql import (
+from sqlian import Sql, UnsupportedParameterError
+from sqlian.standard import (
     compositions as m,
+    constants as n,
     expressions as e,
     functions as f,
 )
@@ -55,7 +56,7 @@ def test_list_identifier(engine):
 
 
 def test_list_mixed(engine):
-    sql = m.List(e.Identifier('name'), star, 'Mosky')
+    sql = m.List(e.Identifier('name'), n.star, 'Mosky')
     assert sql.__sql__(engine) == Sql('''
         ("name", *, 'Mosky')
     '''.strip())

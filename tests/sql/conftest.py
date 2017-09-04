@@ -1,8 +1,8 @@
 import pytest
 
-from sqlian.engines import StandardEngine
+from sqlian.standard import Engine
 
 
 @pytest.fixture
 def engine():
-    return StandardEngine()
+    return Engine()

@@ -1,7 +1,8 @@
-from sqlian import Sql, star
-from sqlian.sql import (
+from sqlian import Sql
+from sqlian.standard import (
     clauses as c,
     compositions as m,
+    constants as n,
     expressions as e,
     functions as f,
     queries as q,
@@ -74,7 +75,7 @@ def test_select_where_equal(engine):
 
 def test_select_where_like(engine):
     query = q.Select(
-        c.Select(star),
+        c.Select(n.star),
         c.From(e.Identifier('person')),
         c.Where(e.Like(e.Identifier('name'), 'Mosky%')),
         c.Limit(3), c.Offset(1),
@@ -86,7 +87,7 @@ def test_select_where_like(engine):
 
 def test_select_where_in(engine):
     query = q.Select(
-        c.Select(star),
+        c.Select(n.star),
         c.From(e.Identifier('person')),
         c.Where(e.In(
             e.Identifier('person_id'),
@@ -100,7 +101,7 @@ def test_select_where_in(engine):
 
 def test_select_where_is_null(engine):
     query = q.Select(
-        c.Select(star),
+        c.Select(n.star),
         c.From(e.Identifier('person')),
         c.Where(e.Equal(e.Identifier('name'), None)),
     )
@@ -111,7 +112,7 @@ def test_select_where_is_null(engine):
 
 def test_select_where_greater_than_like(engine):
     query = q.Select(
-        c.Select(star),
+        c.Select(n.star),
         c.From(e.Identifier('person')),
         c.Where(e.And(
             e.GreaterThan(e.Identifier('age'), 20),
@@ -125,7 +126,7 @@ def test_select_where_greater_than_like(engine):
 
 def test_select_where_false(engine):
     query = q.Select(
-        c.Select(star),
+        c.Select(n.star),
         c.From(e.Identifier('person')),
         c.Where(False),
     )
@@ -133,7 +134,7 @@ def test_select_where_false(engine):
 
 
 def test_select_from(engine):
-    query = q.Select(c.Select(star), c.From(e.Identifier('person')))
+    query = q.Select(c.Select(n.star), c.From(e.Identifier('person')))
     assert query.__sql__(engine) == Sql('SELECT * FROM "person"')
 
 
@@ -165,7 +166,7 @@ def test_select_qualified_as(engine):
 
 def test_select_order_by(engine):
     query = q.Select(
-        c.Select(star),
+        c.Select(n.star),
         c.From(e.Identifier('person')),
         c.Where(e.Like(e.Identifier('name'), 'Mosky%')),
         c.OrderBy(e.Identifier('age')),
@@ -177,7 +178,7 @@ def test_select_order_by(engine):
 
 def test_select_order_by_desc(engine):
     query = q.Select(
-        c.Select(star),
+        c.Select(n.star),
         c.From(e.Identifier('person')),
         c.Where(e.Like(e.Identifier('name'), 'Mosky%')),
         c.OrderBy(m.Ordering(e.Identifier('age'), 'desc')),
@@ -189,7 +190,7 @@ def test_select_order_by_desc(engine):
 
 def test_select_param(engine):
     query = q.Select(
-        c.Select(star),
+        c.Select(n.star),
         c.From(e.Identifier('table')),
         c.Where(e.And(
             e.Equal(e.Identifier('auto_param'), e.Parameter('auto_param')),
@@ -207,7 +208,7 @@ def test_select_param(engine):
 
 def test_select_count(engine):
     query = q.Select(
-        c.Select(f.Count(star)),
+        c.Select(f.Count(n.star)),
         c.From(e.Identifier('person')),
         c.GroupBy(e.Identifier('age')),
     )
@@ -218,7 +219,7 @@ def test_select_count(engine):
 
 def test_select_join_natural(engine):
     query = q.Select(
-        c.Select(star),
+        c.Select(n.star),
         c.From(m.Join(
             e.Identifier('person'),
             'NATURAL', e.Identifier('detail'),
@@ -231,7 +232,7 @@ def test_select_join_natural(engine):
 
 def test_select_join_inner_on(engine):
     query = q.Select(
-        c.Select(star),
+        c.Select(n.star),
         c.From(m.Join(
             e.Identifier('person'), 'INNER', e.Identifier('detail'),
             c.On(e.Equal(
@@ -248,7 +249,7 @@ def test_select_join_inner_on(engine):
 
 def test_select_join_left_using(engine):
     query = q.Select(
-        c.Select(star),
+        c.Select(n.star),
         c.From(m.Join(
             e.Identifier('person'), 'LEFT', e.Identifier('detail'),
             c.Using(m.List(e.Identifier('person_id'))),
@@ -261,7 +262,7 @@ def test_select_join_left_using(engine):
 
 def test_select_join_cross(engine):
     query = q.Select(
-        c.Select(star),
+        c.Select(n.star),
         c.From(m.Join(
             e.Identifier('person'),
             'CROSS', e.Identifier('detail'),
@@ -274,7 +275,7 @@ def test_select_join_cross(engine):
 
 def test_select_join_right_using(engine):
     query = q.Select(
-        c.Select(star),
+        c.Select(n.star),
         c.From(m.Join(
             e.Identifier('person'), 'RIGHT', e.Identifier('detail'),
             c.Using(m.List(e.Identifier('person_id'))),
