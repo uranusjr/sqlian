@@ -2,9 +2,9 @@ import collections
 import inspect
 
 from sqlian import compat, Parsable, Sql
-from sqlian.utils import is_flat_two_tuple
+from sqlian.utils import is_flat_two_tuple, is_non_string_sequence
 
-from .compositions import As
+from .compositions import As, List
 
 
 class Expression(Parsable):
@@ -26,6 +26,18 @@ class Value(Expression):
 
     def __sql__(self, engine):
         return engine.as_value(self.wrapped)
+
+    def __hash__(self):
+        return hash(self.wrapped)
+
+    def __eq__(self, other):
+        return self.wrapped == other
+
+    @classmethod
+    def parse_native(cls, value, engine):
+        if is_non_string_sequence(value):
+            return List(*(cls.parse(v, engine) for v in value))
+        return super(Value, cls).parse_native(value, engine)
 
 
 class Identifier(Expression):
@@ -49,11 +61,11 @@ class Identifier(Expression):
     def parse_native(cls, value, engine):
         if is_flat_two_tuple(value):
             exp, alias = value
-            return As(cls.parse(exp), Identifier.parse(alias))
+            return As(cls.parse(exp, engine), Identifier.parse(alias, engine))
         return cls(*(
             part[1:-1] if (
                 part.startswith(engine.identifier_quote) and
-                part.endsswith(engine.identifier_quote)
+                part.endswith(engine.identifier_quote)
             ) else part
             for part in value.split('.')
         ))

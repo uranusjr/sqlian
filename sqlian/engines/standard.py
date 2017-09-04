@@ -128,15 +128,15 @@ class Engine(BaseEngine):
             )
 
         if on is not None:
-            on_using = self.clauses.On.parse(on)
+            on_using = self.clauses.On.parse(on, self)
         elif using is not None:
-            on_using = self.clauses.Using.parse(using)
+            on_using = self.clauses.Using.parse(using, self)
         else:
             on_using = None
 
         return functools.partial(
             self.compositions.Join,
             join_type=join_type,
-            join_item=self.expressions.Identifier.parse(join_item),
+            join_item=self.expressions.Identifier.parse(join_item, self),
             on_using=on_using,
         )
