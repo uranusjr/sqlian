@@ -29,6 +29,8 @@ class Clause(Parsable):
         )
 
     def __sql__(self, engine):
+        if not self.children:
+            return self.sql_name
         arg_sql = Sql(', ').join(engine.as_value(c) for c in self.children)
         if not self.sql_name:
             return arg_sql
