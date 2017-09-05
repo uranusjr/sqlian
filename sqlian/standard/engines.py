@@ -27,6 +27,20 @@ def ensure_sql_wrapped(func):
     return ensure_sql(func)
 
 
+class QuerySql(Sql):
+    """SQL variant that "knows" from what query itself is built from.
+    """
+    @classmethod
+    def from_query(cls, query, engine):
+        sql = cls(query.__sql__(engine))
+        sql._source_query = query
+        return sql
+
+    @property
+    def source_query(self):
+        return self._source_query
+
+
 def query_builder(f):
     """Convert decorated callable to a query builder.
 
@@ -59,7 +73,8 @@ def query_builder(f):
                 key = query_klass.param_aliases[key]
             prepend_args.append(param_cls[key].parse(arg, self))
 
-        return self.as_sql(query_klass(*(prepend_args + clause_args)))
+        query = query_klass(*(prepend_args + clause_args))
+        return QuerySql.from_query(query, self)
 
     wrapped.__query_builder__ = True
     return wrapped
@@ -184,11 +199,6 @@ class Engine(BaseEngine):
         if isinstance(name, six.text_type):
             return self.format_identifier(name)
         raise UnescapableError(name)
-
-    def as_sql(self, value):
-        if hasattr(value, '__sql__'):
-            return value.__sql__(self)
-        raise UnescapableError(value)
 
     # Shorthand methods.
 
