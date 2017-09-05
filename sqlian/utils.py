@@ -1,5 +1,6 @@
 import collections
 import functools
+import inspect
 import itertools
 
 import six

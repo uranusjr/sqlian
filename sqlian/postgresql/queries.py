@@ -2,11 +2,15 @@
 from sqlian.standard.queries import *   # noqa
 
 from sqlian.standard.queries import (
+    __all__,
     Insert as StandardInsert,
     Select as StandardSelect,
 )
 
 from .clauses import Locking, Returning
+
+
+__all__ = __all__
 
 
 class Insert(StandardInsert):

@@ -3,6 +3,12 @@ from sqlian import Sql
 from . import clauses as c
 
 
+__all__ = [
+    'Query', 'QueryError', 'DuplicateClauseError', 'InvalidClauseError',
+    'Select', 'Insert', 'Update', 'Delete',
+]
+
+
 class QueryError(ValueError):
     def __init__(self, clause_name, query_name):
         super(QueryError, self).__init__(self.error_template.format(

@@ -16,6 +16,16 @@ from .expressions import (
 )
 
 
+__all__ = [
+    'Clause', 'IdentifierClause',
+    'Select', 'From', 'Where', 'On', 'Using',
+    'GroupBy', 'OrderBy', 'Limit', 'Offset',
+    'InsertInto', 'Columns', 'Values',
+    'Update', 'Set',
+    'DeleteFrom',
+]
+
+
 class Clause(Parsable):
 
     def __init__(self, *children):

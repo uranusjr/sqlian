@@ -2,12 +2,15 @@
 from sqlian.standard.queries import *   # noqa
 
 from sqlian.standard.queries import (
-    Query,
+    __all__, Query,
     Insert as StandardInsert,
     Select as StandardSelect,
 )
 
 from . import clauses as c
+
+
+__all__ = __all__ + ['Replace']
 
 
 class Insert(StandardInsert):

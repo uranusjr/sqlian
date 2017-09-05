@@ -1,6 +1,12 @@
 from sqlian import Sql, UnsupportedParameterError
 
 
+__all__ = [
+    'Composition',
+    'As', 'Assign', 'Join', 'List', 'Ordering',
+]
+
+
 class Composition(object):
 
     def __init__(self, *args):

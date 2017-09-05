@@ -2,7 +2,10 @@
 from sqlian.standard.clauses import *   # noqa
 
 from sqlian import Sql, UnsupportedParameterError
-from sqlian.standard import Clause
+from sqlian.standard.clauses import __all__, Clause
+
+
+__all__ = __all__ + ['Locking', 'Returning']
 
 
 ALLOWED_LOCKING_STRENGTHS = {

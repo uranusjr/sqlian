@@ -2,7 +2,13 @@
 from sqlian.standard.clauses import *   # noqa
 
 from sqlian import Sql, UnsupportedParameterError
-from sqlian.standard import Clause, IdentifierClause
+from sqlian.standard.clauses import __all__, Clause, IdentifierClause
+
+
+__all__ = __all__ + [
+    'Locking', 'ForUpdate', 'LockInShareMode',
+    'OnDuplicateKeyUpdate', 'ReplaceInto',
+]
 
 
 ALLOWED_LOCKING_MODES = {
@@ -24,6 +30,16 @@ class Locking(Clause):
 
     def __sql__(self, engine):
         return Sql(self.mode)
+
+
+class ForUpdate(Locking):
+    def __init__(self):
+        super(ForUpdate, self).__init__('FOR UPDATE')
+
+
+class LockInShareMode(Locking):
+    def __init__(self):
+        super(LockInShareMode, self).__init__('LOCK IN SHARE MODE')
 
 
 class OnDuplicateKeyUpdate(Clause):

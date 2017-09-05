@@ -6,7 +6,7 @@ def test_select_for_update(engine, c, e, f, q):
         c.Select(f.Count(star)),
         c.From(e.Identifier('person')),
         c.Where(e.Equal(e.Identifier('person_id'), 1)),
-        c.Locking('for update'),
+        c.ForUpdate(),
     )
     assert sql.__sql__(engine) == Sql('''
         SELECT COUNT(*) FROM `person` WHERE `person_id` = 1 FOR UPDATE
@@ -18,7 +18,7 @@ def test_select_lock_in_share_mode(engine, c, e, q):
         c.Select(star),
         c.From(e.Identifier('person')),
         c.Where(e.Equal(e.Identifier('person_id'), 1)),
-        c.Locking('lock in share mode'),
+        c.LockInShareMode(),
     )
     assert sql.__sql__(engine) == Sql(
         'SELECT * FROM `person` WHERE `person_id` = 1 LOCK IN SHARE MODE'
@@ -29,9 +29,7 @@ def test_insert_on_duplicate_key_update(engine, c, e, m, q):
     sql = q.Insert(
         c.InsertInto(e.Identifier('person')),
         c.Values(m.List('mosky', 'Mosky Liu')),
-        c.OnDuplicateKeyUpdate(
-            m.Assign(e.Identifier('name'), 'Mosky Liu'),
-        ),
+        c.OnDuplicateKeyUpdate(m.Assign(e.Identifier('name'), 'Mosky Liu')),
     )
     assert sql.__sql__(engine) == Sql(
         'INSERT INTO `person` '

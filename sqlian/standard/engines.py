@@ -61,6 +61,7 @@ def query_builder(f):
 
         return self.as_sql(query_klass(*(prepend_args + clause_args)))
 
+    wrapped.__query_builder__ = True
     return wrapped
 
 
