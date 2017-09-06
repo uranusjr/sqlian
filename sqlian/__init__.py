@@ -14,4 +14,4 @@ __all__ = [
 
 VERSION = (0, 1, 0, 'dev')
 
-__version__ = '{}.{}.{}-{}'.format(*VERSION)
+__version__ = '.'.join(str(v) for v in VERSION)
