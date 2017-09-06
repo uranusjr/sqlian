@@ -11,6 +11,7 @@ python:
 install:
   - pip install pipenv
   - pipenv install --dev
+  - pip install --upgrade setuptools
 
 script:
   - make test
