@@ -35,8 +35,7 @@ setup(
     packages=find_packages(),
     install_requires=['six'],
     license='MIT',
-    zip_safe=False,
-    keywords=['sql'],
+    keywords=['SQL'],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
@@ -48,5 +47,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: Implementation :: CPython',
+        'Programming Language :: Python :: Implementation :: PyPy',
     ],
 )

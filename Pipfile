@@ -6,8 +6,6 @@ verify_ssl = true
 pytest = "*"
 pytest-cov = "*"
 pytest-pythonpath = "*"
-tox = "*"
-ipython = "*"
 flake8 = "*"
 
 [packages]

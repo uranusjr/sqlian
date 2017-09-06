@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "a783107792cb752f64b98aac2a0df9d044db9e280a940342d95113ba1787c4cd"
+            "sha256": "a705c35f99eae15b631721e4fb90a3ce0c1fb11ba0d1e01f22adedb8e969b7d1"
         },
         "pipfile-spec": 1,
         "requires": {},
@@ -18,44 +18,14 @@
         }
     },
     "develop": {
-        "appnope": {
-            "version": "==0.1.0"
-        },
         "coverage": {
             "version": "==4.4.1"
-        },
-        "decorator": {
-            "version": "==4.1.2"
         },
         "flake8": {
             "version": "==3.4.1"
         },
-        "ipython": {
-            "version": "==6.1.0"
-        },
-        "ipython-genutils": {
-            "version": "==0.2.0"
-        },
-        "jedi": {
-            "version": "==0.10.2"
-        },
         "mccabe": {
             "version": "==0.6.1"
-        },
-        "pexpect": {
-            "version": "==4.2.1"
-        },
-        "pickleshare": {
-            "version": "==0.7.4"
-        },
-        "pluggy": {
-            "version": "==0.5.1"
-        },
-        "prompt-toolkit": {
-            "version": "==1.0.15"
-        },
-        "ptyprocess": {
-            "version": "==0.5.2"
         },
         "py": {
             "version": "==1.4.34"
@@ -66,9 +36,6 @@
         "pyflakes": {
             "version": "==1.5.0"
         },
-        "pygments": {
-            "version": "==2.2.0"
-        },
         "pytest": {
             "version": "==3.2.1"
         },
@@ -77,24 +44,6 @@
         },
         "pytest-pythonpath": {
             "version": "==0.7.1"
-        },
-        "simplegeneric": {
-            "version": "==0.8.1"
-        },
-        "six": {
-            "version": "==1.10.0"
-        },
-        "tox": {
-            "version": "==2.8.1"
-        },
-        "traitlets": {
-            "version": "==4.3.2"
-        },
-        "virtualenv": {
-            "version": "==15.1.0"
-        },
-        "wcwidth": {
-            "version": "==0.1.7"
         }
     }
 }
