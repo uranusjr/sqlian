@@ -8,6 +8,7 @@ pytest-cov = "*"
 pytest-pythonpath = "*"
 tox = "*"
 ipython = "*"
+flake8 = "*"
 
 [packages]
 six = "*"

@@ -1,8 +1,9 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "b2aec2576636fac20a4979c6f5af6509daff8caa09299e7f4695901180442dbf"
+            "sha256": "a783107792cb752f64b98aac2a0df9d044db9e280a940342d95113ba1787c4cd"
         },
+        "pipfile-spec": 1,
         "requires": {},
         "sources": [
             {
@@ -26,6 +27,9 @@
         "decorator": {
             "version": "==4.1.2"
         },
+        "flake8": {
+            "version": "==3.4.1"
+        },
         "ipython": {
             "version": "==6.1.0"
         },
@@ -35,6 +39,9 @@
         "jedi": {
             "version": "==0.10.2"
         },
+        "mccabe": {
+            "version": "==0.6.1"
+        },
         "pexpect": {
             "version": "==4.2.1"
         },
@@ -42,7 +49,7 @@
             "version": "==0.7.4"
         },
         "pluggy": {
-            "version": "==0.4.0"
+            "version": "==0.5.1"
         },
         "prompt-toolkit": {
             "version": "==1.0.15"
@@ -52,6 +59,12 @@
         },
         "py": {
             "version": "==1.4.34"
+        },
+        "pycodestyle": {
+            "version": "==2.3.1"
+        },
+        "pyflakes": {
+            "version": "==1.5.0"
         },
         "pygments": {
             "version": "==2.2.0"
@@ -65,9 +78,6 @@
         "pytest-pythonpath": {
             "version": "==0.7.1"
         },
-        "setuptools": {
-            "version": "==36.2.7"
-        },
         "simplegeneric": {
             "version": "==0.8.1"
         },
@@ -75,7 +85,7 @@
             "version": "==1.10.0"
         },
         "tox": {
-            "version": "==2.7.0"
+            "version": "==2.8.1"
         },
         "traitlets": {
             "version": "==4.3.2"
