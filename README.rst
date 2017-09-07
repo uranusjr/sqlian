@@ -17,13 +17,13 @@ A good SQLian like a good shepherd. I handle SQL strings so you don’t have to.
 The Basics
 ============
 
-Connect to a database…
+Connect to a database::
 
     import sqlian
     db = sqlian.connect('sqlite://:memory:')
 
 
-Perform a query…
+Perform a query::
 
     rows = db.select(
         'name', 'occupation',
@@ -32,20 +32,16 @@ Perform a query…
     )
 
 
-You can access the data directly…
-
-.. code-block:: pycon
+You can access the data directly::
 
     >>> rows[0]
     <Record {"name": "Mosky", "occupation": "Pinkoi"}>
 
 
-Or iterate over them…
-
-.. code-block:: python
+Or iterate over them::
 
     for r in rows:
         print('{} works at {}'.format(r.name, r.occupation))
 
 
-There are much more! `Read the documentation. <https://sqlian.readthedocs.io/en/latest/#table-of-contents>`__
+And much more! `Read the documentation. <https://sqlian.readthedocs.io/en/latest/#table-of-contents>`__

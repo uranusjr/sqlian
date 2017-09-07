@@ -12,6 +12,6 @@ __all__ = [
 ]
 
 
-VERSION = (0, 1, 0, 'dev')
+VERSION = (0, 1, 0, 'dev0')
 
 __version__ = '.'.join(str(v) for v in VERSION)

@@ -4,12 +4,16 @@ ALL: help
 
 help:
 	@echo 'Available commands:'
-	@echo '  help  - Display this message and exists'
+	@echo '  help  - Display this message and exist'
+	@echo '  check - Check package metadata for PyPI publish'
 	@echo '  docs  - Build documentation with Sphinx'
 	@echo '  lint  - Lint sources with Flake8'
 	@echo '  test  - Run tests (implies linting)'
 	@echo '  tox   - Run tests for all platforms with Tox'
 	@echo '  watch - Start Sphinx autobuild watcher'
+
+check:
+	pipenv run python setup.py check --restructuredtext --strict
 
 docs:
 	make -C docs html
