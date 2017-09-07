@@ -125,6 +125,14 @@ class BaseEngine(object):
             )
 
 
+def iter_all_members(*modules):
+    return (
+        (name, getattr(module, name))
+        for module in modules
+        for name in module.__all__
+    )
+
+
 class Engine(BaseEngine):
     """Engine that emits ANSI-compliant SQL.
     """
@@ -132,15 +140,18 @@ class Engine(BaseEngine):
         clauses, compositions, constants, expressions, functions, queries,
     )
 
+    # Perform "from X import *" for these modules.
+    locals().update({k: v for k, v in iter_all_members(
+        compositions, constants, expressions, functools,
+    )})
+
     identifier_quote = '"'
     string_quote = "'"
 
-    star = constants.star
-
     # Formatter methods: Override to format things of a certain type to SQL.
 
-    def format_star(self):
-        return '*'
+    def format_constant(self, value):
+        return {self.star: '*'}[value]
 
     def format_null(self):
         return 'NULL'
@@ -171,12 +182,12 @@ class Engine(BaseEngine):
     # "Smart" methods: Call these to format a given object to SQL.
 
     def as_value(self, value):
-        if value is None:
-            return self.format_null()
-        if value is self.star:
-            return self.format_star()
         if hasattr(value, '__sql__'):
             return value.__sql__(self)
+        if value is None:
+            return self.format_null()
+        if isinstance(value, self.Constant):
+            return self.format_constant(value)
         if isinstance(value, bool):
             return self.format_boolean(value)
         if isinstance(value, numbers.Number):
@@ -188,12 +199,12 @@ class Engine(BaseEngine):
         raise UnescapableError(value)
 
     def as_identifier(self, name):
-        if name is None:
-            return self.format_null()
-        if name is self.star:
-            return self.format_star()
         if hasattr(name, '__sql__'):
             return name.__sql__(self)
+        if name is None:
+            return self.format_null()
+        if isinstance(name, self.Constant):
+            return self.format_constant(name)
         if isinstance(name, six.binary_type):
             return self.format_identifier(name.decode('utf-8'))
         if isinstance(name, six.text_type):
@@ -252,8 +263,8 @@ class Engine(BaseEngine):
             on_using = None
 
         return functools.partial(
-            self.compositions.Join,
+            self.Join,
             join_type=join_type,
-            join_item=self.expressions.Identifier.parse(join_item, self),
+            join_item=self.Identifier.parse(join_item, self),
             on_using=on_using,
         )
