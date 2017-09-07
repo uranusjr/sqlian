@@ -140,10 +140,6 @@ A record can be accessed like a sequence, mapping, or even object:
     >>> row.main_language
     Python
 
-And in fact, it conforms completely to the `Sequence and Mapping ABCs`_, so you
-can freely treat them as such, and easily convert a record to built-in Python
-type.
-
 
 .. _12factor: https://www.12factor.net/backing-services
 .. _DJ-Database-URL: https://github.com/kennethreitz/dj-database-url
