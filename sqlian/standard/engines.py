@@ -127,6 +127,8 @@ class Engine(BaseEngine):
     )
 
     # Perform "from X import *" for these modules.
+    # Clauses and queries are NOT loaded into the top scope because they
+    # are always acceible by engine methods and their kwargs.
     locals().update({k: v for k, v in iter_all_members(
         compositions, constants, expressions, functions,
     )})
