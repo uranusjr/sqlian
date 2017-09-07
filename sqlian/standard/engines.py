@@ -128,7 +128,7 @@ class Engine(BaseEngine):
 
     # Perform "from X import *" for these modules.
     locals().update({k: v for k, v in iter_all_members(
-        compositions, constants, expressions, functools,
+        compositions, constants, expressions, functions,
     )})
 
     identifier_quote = '"'
