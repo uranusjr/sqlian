@@ -1,7 +1,7 @@
 Installation Guide
 ===================
 
-I highly recommend you check out Pipenv by Kenneth Reitz to handle you project
+I highly recommend you check out Pipenv_ by Kenneth Reitz to handle you project
 dependencies. With Pipenv, you can insall SQLian simply with::
 
     $ pipenv install sqlian
@@ -20,3 +20,6 @@ Or even just clone and install manually yourself::
     $ git clone https://github.com/uranusjr/sqlian.git
     $ cd sqlian
     $ python setup.py install
+
+
+.. _Pipenv: http://pipenv.org
