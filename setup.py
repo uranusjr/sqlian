@@ -20,15 +20,16 @@ def get_version():
     return '.'.join(str(v) for v in eval(code))
 
 
-# readme = open('README.rst').read()
+readme = open('README.rst').read()
 # history = open('HISTORY.rst').read().replace('.. :changelog:', '')
+history = ''
 
 
 setup(
     name='sqlian',
     version=get_version(),
     description='A good SQLian like a good shepherd.',
-    # long_description='\n\n'.join([readme, history]),
+    long_description='\n\n'.join([readme, history]),
     author='Tzu-ping Chung',
     author_email='uranusjr@gmail.com',
     url='https://github.com/uranusjr/sqlian',

@@ -4,6 +4,11 @@ SQLian
 
 .. image:: https://travis-ci.org/uranusjr/sqlian.svg?branch=master
     :target: https://travis-ci.org/uranusjr/sqlian
+    :alt: Project Build Status
+
+.. image:: https://readthedocs.org/projects/sqlian/badge/?version=latest
+    :target: http://sqlian.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 
 
 A good SQLian like a good shepherd. I handle SQL strings so you don’t have to.
@@ -43,4 +48,4 @@ Or iterate over them…
         print('{} works at {}'.format(r.name, r.occupation))
 
 
-And there are much more!
+There are much more! `Read the documentation. <https://sqlian.readthedocs.io/en/latest/#table-of-contents>`__
