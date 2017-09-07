@@ -106,7 +106,7 @@ so you can handle those data.
 
 .. code-block:: pycon
 
-    >>> rows = db.select('person')
+    >>> rows = db.select(sqlian.star, from_='person')
     >>> rows
     <RecordCollection (pending)>
 
