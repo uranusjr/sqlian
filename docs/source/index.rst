@@ -32,7 +32,7 @@ and perform a query:
     rows = db.select(
         'name', 'occupation',
         from_='person',
-        where={'favorite_language': 'Python'},
+        where={'main_language': 'Python'},
     )
 
 
@@ -55,14 +55,13 @@ or iterate over them:
 Interested? Read on!
 
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents
-
-
-Indices and tables
+Table of Contents
 ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. toctree::
+   :maxdepth: 2
+
+   installation
+   quickstart
+   inspirations
+   indices-and-tables

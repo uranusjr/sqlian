@@ -23,7 +23,7 @@ Perform a query…
     rows = db.select(
         'name', 'occupation',
         from_='person',
-        where={'favorite_language': 'Python'},
+        where={'main_language': 'Python'},
     )
 
 

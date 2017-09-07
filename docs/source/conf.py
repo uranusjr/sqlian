@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Sqlian documentation build configuration file, created by
+# SQLian documentation build configuration file, created by
 # sphinx-quickstart on Wed Sep  6 14:50:09 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -19,8 +19,6 @@
 #
 import os
 
-import sphinx_rtd_theme
-
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
@@ -37,7 +35,9 @@ PROJECT_ROOT = os.path.abspath(os.path.join(__file__, '..', '..', '..'))
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = []
+extensions = [
+    'sphinx.ext.autodoc',
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -52,7 +52,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'Sqlian'
+project = 'SQLian'
 copyright = '2017, Tzu-ping Chung'
 author = 'Tzu-ping Chung'
 
@@ -95,8 +95,6 @@ todo_include_todos = False
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
-
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -155,7 +153,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'sqlian.tex', 'Sqlian Documentation',
+    (master_doc, 'sqlian.tex', 'SQLian Documentation',
      'Tzu-ping Chung', 'manual'),
 ]
 
@@ -165,7 +163,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'sqlian', 'Sqlian Documentation',
+    (master_doc, 'sqlian', 'SQLian Documentation',
      [author], 1)
 ]
 
@@ -176,7 +174,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Sqlian', 'Sqlian Documentation',
-     author, 'Sqlian', 'A good SQLian like a good shepherd.',
+    (master_doc, 'SQLian', 'SQLian Documentation',
+     author, 'SQLian', 'A good SQLian like a good shepherd.',
      'Miscellaneous'),
 ]
