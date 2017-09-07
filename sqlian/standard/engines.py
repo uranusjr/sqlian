@@ -28,7 +28,7 @@ def ensure_sql_wrapped(func):
 
 
 class QuerySql(Sql):
-    """SQL variant that "knows" from what query itself is built from.
+    """SQL variant that "knows" what query itself is built from.
     """
     @classmethod
     def from_query(cls, query, engine):
@@ -81,7 +81,7 @@ def query_builder(f):
 
 
 class Join(object):
-    """Pxory callable for Engine.join() with sub-callables.
+    """Proxy callable for Engine.join() with sub-callables.
 
     Attributes on this callable object represent join variants.
     """
