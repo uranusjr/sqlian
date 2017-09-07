@@ -27,20 +27,6 @@ def ensure_sql_wrapped(func):
     return ensure_sql(func)
 
 
-class QuerySql(Sql):
-    """SQL variant that "knows" what query itself is built from.
-    """
-    @classmethod
-    def from_query(cls, query, engine):
-        sql = cls(query.__sql__(engine))
-        sql._source_query = query
-        return sql
-
-    @property
-    def source_query(self):
-        return self._source_query
-
-
 def query_builder(f):
     """Convert decorated callable to a query builder.
 
@@ -74,7 +60,7 @@ def query_builder(f):
             prepend_args.append(param_cls[key].parse(arg, self))
 
         query = query_klass(*(prepend_args + clause_args))
-        return QuerySql.from_query(query, self)
+        return query.__sql__(self)
 
     wrapped.__query_builder__ = True
     return wrapped

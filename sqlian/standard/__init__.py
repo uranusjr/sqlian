@@ -3,6 +3,7 @@ from .constants import star
 from .expressions import Equal, Identifier, Value
 from .functions import Count, Sum
 
+from .databases import Database
 from .engines import Engine
 
 
@@ -12,5 +13,5 @@ __all__ = [
     'Identifier', 'Value', 'Equal',
     'Count', 'Sum',
 
-    'Engine',
+    'Database', 'Engine',
 ]

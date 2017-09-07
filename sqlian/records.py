@@ -4,6 +4,9 @@ import json
 import six
 
 
+__all__ = ['Record', 'RecordCollection']
+
+
 class Record(object):
     """A single row of data from a database.
     """
@@ -65,13 +68,49 @@ class Record(object):
         return zip(self._keys, self._values)
 
 
+class CursorIterator(object):
+    """Helper class to iterate through a cursor.
+
+    This class is meant to be used internally to support cursors that does not
+    already provide the iterator interface.
+    """
+    def __init__(self, cursor):
+        self.cursor = cursor
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        row = self.cursor.fetchone()
+        if row is not None:
+            return row
+        raise StopIteration
+
+    # Python 2 compatibility.
+    def next(self):
+        return self.__next__()
+
+
 class RecordCollection(object):
     """A sequence of records.
     """
-    def __init__(self, row_gen):
-        self._row_gen = row_gen
+    def __init__(self, record_generator):
+        self._row_gen = record_generator
         self._resolved_rows = []
         self._pending = True
+
+    @classmethod
+    def from_cursor(cls, cursor):
+        """A shorthand to create a `RecordCollection` from a DB-API 2.0 cursor.
+        """
+        if cursor.description is None:
+            return RecordCollection(iter(()))   # Empty collection.
+        keys = tuple(desc[0] for desc in cursor.description)
+        try:
+            it = iter(cursor)
+        except AttributeError:
+            it = CursorIterator(cursor)
+        return cls(Record(keys, row) for row in it)
 
     def __repr__(self):
         parts = []
@@ -120,3 +159,16 @@ class RecordCollection(object):
         if slicing:
             return type(self)(iter(self._resolved_rows[key]))
         return self._resolved_rows[key]
+
+    def __len__(self):
+        if self._pending:
+            for _ in self:  # Resolve everything!
+                pass
+        return len(self._resolved_rows)
+
+    def __bool__(self):
+        return len(self) != 0
+
+    # Python 2 compatibility.
+    def __nonzero__(self):
+        return self.__bool__()

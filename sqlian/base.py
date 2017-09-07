@@ -35,6 +35,9 @@ class Sql(six.text_type):
     def __sql__(self, engine):
         return self
 
+    def __hash__(self):
+        return six.text_type.__hash__(self)
+
     def __eq__(self, other):
         return isinstance(other, Sql) and super(Sql, self).__eq__(other)
 
