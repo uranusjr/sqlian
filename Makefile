@@ -27,5 +27,7 @@ test: lint
 tox:
 	tox
 
+# This requires sphinx-autobuild. It is not listed in the Pipfile because
+# PyPy3 does not like it and causes CI to fail. :(
 watch:
 	pipenv run sphinx-autobuild docs/source docs/build/html

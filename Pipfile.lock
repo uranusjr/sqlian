@@ -1,7 +1,20 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "024c1ef70510227796ecb1ff0dab741edcc5a37656351e1f1be4271bc03f211d"
+            "sha256": "83f04e30541e4a01fd33895a0a4549739eb8d1270764752ea89262bd66ce04c5"
+        },
+        "host-environment-markers": {
+            "implementation_name": "pypy",
+            "implementation_version": "3.5.3",
+            "os_name": "posix",
+            "platform_machine": "x86_64",
+            "platform_python_implementation": "PyPy",
+            "platform_release": "16.7.0",
+            "platform_system": "Darwin",
+            "platform_version": "Darwin Kernel Version 16.7.0: Thu Jun 15 17:36:27 PDT 2017; root:xnu-3789.70.16~2/RELEASE_X86_64",
+            "python_full_version": "3.5.3",
+            "python_version": "3.5",
+            "sys_platform": "darwin"
         },
         "pipfile-spec": 1,
         "requires": {},
@@ -20,9 +33,6 @@
     "develop": {
         "alabaster": {
             "version": "==0.7.10"
-        },
-        "argh": {
-            "version": "==0.26.2"
         },
         "babel": {
             "version": "==2.5.0"
@@ -51,20 +61,11 @@
         "jinja2": {
             "version": "==2.9.6"
         },
-        "livereload": {
-            "version": "==2.5.1"
-        },
         "markupsafe": {
             "version": "==1.0"
         },
         "mccabe": {
             "version": "==0.6.1"
-        },
-        "pathtools": {
-            "version": "==0.1.2"
-        },
-        "port-for": {
-            "version": "==0.3.1"
         },
         "py": {
             "version": "==1.4.34"
@@ -90,9 +91,6 @@
         "pytz": {
             "version": "==2017.2"
         },
-        "pyyaml": {
-            "version": "==3.12"
-        },
         "requests": {
             "version": "==2.18.4"
         },
@@ -105,23 +103,14 @@
         "sphinx": {
             "version": "==1.6.3"
         },
-        "sphinx-autobuild": {
-            "version": "==0.7.1"
-        },
         "sphinx-rtd-theme": {
             "version": "==0.2.4"
         },
         "sphinxcontrib-websupport": {
             "version": "==1.0.1"
         },
-        "tornado": {
-            "version": "==4.5.2"
-        },
         "urllib3": {
             "version": "==1.22"
-        },
-        "watchdog": {
-            "version": "==0.8.3"
         }
     }
 }
