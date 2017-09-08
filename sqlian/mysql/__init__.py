@@ -1,7 +1,7 @@
-from .databases import MySQLdbDatabase
+from .databases import MySQLDBDatabase, PyMySQLDatabase
 from .engines import Engine
 
 
 __all__ = [
-    'Engine', 'MySQLdbDatabase',
+    'Engine', 'MySQLDBDatabase', 'PyMySQLDatabase',
 ]

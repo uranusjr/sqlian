@@ -3,17 +3,17 @@ import warnings
 import pytest
 
 from sqlian import star
-from sqlian.mysql import MySQLDBDatabase
+from sqlian.mysql import PyMySQLDatabase
 
 
-MySQLdb = pytest.importorskip('MySQLdb')
+pymysql = pytest.importorskip('pymysql')
 
 
 @pytest.fixture(scope='module')
 def database_name(request):
     try:
-        conn = MySQLdb.connect()
-    except MySQLdb.OperationalError:
+        conn = pymysql.connect()
+    except pymysql.OperationalError:
         return None
 
     database_name = 'test_sqlian_mysqldb'
@@ -35,7 +35,7 @@ def db(request, database_name):
         pytest.skip('database unavailable')
         return None
 
-    db = MySQLDBDatabase(database=database_name)
+    db = PyMySQLDatabase(database=database_name)
 
     cursor = db.cursor()
     with warnings.catch_warnings():
