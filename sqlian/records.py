@@ -131,15 +131,18 @@ class RecordCollection(object):
             if i < len(self._resolved_rows):
                 yield self._resolved_rows[i]
 
-            # Resolve a new row.
-            else:
+            # Resolve a new row if possible.
+            elif self._pending:
                 try:
                     row = next(self._row_gen)
-                except StopIteration:
+                except StopIteration:   # TODO: See notes below class.
                     self._pending = False
                     return
                 self._resolved_rows.append(row)
                 yield row
+
+            else:
+                return
 
             i += 1
 
@@ -152,7 +155,7 @@ class RecordCollection(object):
             for _ in six.moves.range(stop - len(self._resolved_rows) + 1):
                 try:
                     row = next(self._row_gen)
-                except StopIteration:
+                except StopIteration:   # TODO: See notes below class.
                     self._pending = False
                     break
                 self._resolved_rows.append(row)
@@ -173,3 +176,16 @@ class RecordCollection(object):
     # Python 2 compatibility.
     def __nonzero__(self):
         return self.__bool__()
+
+    # TODO: Handle ProgrammerError.
+    # DB-API states for `fetchone()`, "an Error (or subclass) exception is
+    # raised if the previous call to .execute*() did not produce any result
+    # set or no call was issued yet."
+    # This means we either (1) Need to "know" a query doesn't return a result,
+    # and don't build a cursor-based collection at all, or (2) Should catch
+    # this error here alongside with StopIteration. (1) should be the better
+    # approach because we can't really know if the error is caused by an empty
+    # execution result, but unfortunately it's also extremely difficult to
+    # know whether a query returns result (e.g. INSERT INTO usually doesn't,
+    # but can with RETURNING; SELECT usually does, but doesn't if you have an
+    # INTO clause). For now we just rely on the programmer to handle this.

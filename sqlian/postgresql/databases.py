@@ -3,6 +3,6 @@ from sqlian.standard import Database
 from .engines import Engine
 
 
-class SQLite3Database(Database):
-    dbapi2_module_name = 'sqlite3'
+class Psycopg2Database(Database):
+    dbapi2_module_name = 'psycopg2'
     engine_class = Engine

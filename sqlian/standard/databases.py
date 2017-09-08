@@ -1,4 +1,8 @@
+import importlib
+import inspect
+
 from sqlian.records import RecordCollection
+from sqlian.utils import is_exception_class
 
 
 class Database(object):
@@ -9,9 +13,10 @@ class Database(object):
             host=None, port=None, user=None, password=None,
             params=None, options=None)
         """
-        self._conn = self.create_connection(**kwargs)
+        dbapi = self.get_dbapi2()
+        self.populate_dbapi2_members(dbapi)
+        self._conn = self.create_connection(dbapi, **kwargs)
         self._engine = self.engine_class()
-        self._open = True
 
     def __repr__(self):
         return '<Database open={}>'.format(self.is_open())
@@ -22,10 +27,20 @@ class Database(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
 
-    def create_connection(self, **kwargs):
-        raise NotImplementedError(
-            'implement connect to return a DB-API connection instance',
-        )
+    def get_dbapi2(self):
+        return importlib.import_module(self.dbapi2_module_name)
+
+    def populate_dbapi2_members(self, dbapi):
+        try:
+            all_names = set(dbapi.__all__)
+        except AttributeError:
+            all_names = None
+        for name, member in inspect.getmembers(dbapi, is_exception_class):
+            if all_names is None or name in all_names:
+                setattr(self, name, member)
+
+    def create_connection(self, dbapi, **kwargs):
+        return dbapi.connect(**kwargs)
 
     def is_open(self):
         return self._conn is not None

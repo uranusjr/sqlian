@@ -1,5 +1,6 @@
 import collections
 import functools
+import inspect
 import itertools
 
 import six
@@ -16,6 +17,10 @@ def partition(predicate, iterable):
         six.moves.filterfalse(predicate, t1),
         six.moves.filter(predicate, t2),
     )
+
+
+def is_exception_class(obj):
+    return inspect.isclass(obj) and issubclass(obj, Exception)
 
 
 def is_flat_tuple(s):

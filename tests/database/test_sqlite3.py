@@ -18,8 +18,9 @@ def db(request, tmpdir):
     ''')
     cursor.execute('''
         INSERT INTO "person" ("name", "occupation", "main_language")
-        VALUES ("Mosky", "Pinkoi", "Python")
+        VALUES ('Mosky', 'Pinkoi', 'Python')
     ''')
+    cursor.close()
 
     def finalize():
         db.close()
