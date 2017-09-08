@@ -3,7 +3,7 @@ from sqlian.standard import Database as StandardDatabase
 from .engines import Engine
 
 
-class Database(StandardDatabase):
+class SQLite3Database(StandardDatabase):
 
     engine_class = Engine
 

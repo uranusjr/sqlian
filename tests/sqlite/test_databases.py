@@ -1,13 +1,13 @@
 import pytest
 
 from sqlian import star
-from sqlian.sqlite import Database
+from sqlian.sqlite import SQLite3Database
 
 
 @pytest.fixture
 def db(request, tmpdir):
     dbpath = tmpdir.join('sqlian-test.sqlite3')
-    db = Database(database=str(dbpath))
+    db = SQLite3Database(database=str(dbpath))
 
     cursor = db.cursor()
     cursor.execute('''

@@ -103,9 +103,10 @@ class RecordCollection(object):
     def from_cursor(cls, cursor):
         """A shorthand to create a `RecordCollection` from a DB-API 2.0 cursor.
         """
-        if cursor.description is None:
-            return RecordCollection(iter(()))   # Empty collection.
-        keys = tuple(desc[0] for desc in cursor.description)
+        if isinstance(cursor.description, collections.Sequence):
+            keys = tuple(desc[0] for desc in cursor.description)
+        else:
+            keys = ()
         try:
             it = iter(cursor)
         except AttributeError:
