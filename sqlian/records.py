@@ -177,15 +177,16 @@ class RecordCollection(object):
     def __nonzero__(self):
         return self.__bool__()
 
-    # TODO: Handle ProgrammerError.
+    # TODO: Handle non-query errors.
     # DB-API states for `fetchone()`, "an Error (or subclass) exception is
     # raised if the previous call to .execute*() did not produce any result
     # set or no call was issued yet."
-    # This means we either (1) Need to "know" a query doesn't return a result,
-    # and don't build a cursor-based collection at all, or (2) Should catch
-    # this error here alongside with StopIteration. (1) should be the better
-    # approach because we can't really know if the error is caused by an empty
-    # execution result, but unfortunately it's also extremely difficult to
-    # know whether a query returns result (e.g. INSERT INTO usually doesn't,
-    # but can with RETURNING; SELECT usually does, but doesn't if you have an
-    # INTO clause). For now we just rely on the programmer to handle this.
+    # This means we either (1) Need to "know" a statement doesn't return a
+    # result (i.e. is not a query), and don't build a cursor-based collection
+    # at all, or (2) Should catch this error here alongside with StopIteration.
+    # (1) should be the better approach because we can't really know if the
+    # error is caused by an empty execution result, but unfortunately it's
+    # also extremely difficult to know upfront whether a statement is a query.
+    # For example, INSERT INTO usually is not a query, but can return results
+    # with RETURNING; SELECT usually is a query, but doesn't return results if
+    # you have an INTO clause). For now we rely on the user to handle this.

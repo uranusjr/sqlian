@@ -3,7 +3,7 @@ from sqlian.standard.engines import Engine as BaseEngine
 
 class Engine(BaseEngine):
 
-    from . import clauses, queries
+    from . import clauses, statements
 
     def escape_string(self, value):
         if '\0' in value:   # PostgreSQL doesn't handle NULL byte well?

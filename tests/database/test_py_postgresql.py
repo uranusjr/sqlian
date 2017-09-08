@@ -15,7 +15,7 @@ pytestmark = pytest.mark.skipif(
 def database_name(request):
     try:
         conn = dbapi.connect(database='postgres')
-    except dbapi.OperationalError:
+    except dbapi.DatabaseError:
         return None
     conn.autocommit = True  # Required for CREATE DATABASE.
 

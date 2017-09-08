@@ -1,8 +1,8 @@
 from sqlian import Sql, star
 
 
-def test_select_for_update(engine, c, e, f, q):
-    sql = q.Select(
+def test_select_for_update(engine, c, e, f, s):
+    sql = s.Select(
         c.Select(f.Count(star)),
         c.From(e.Identifier('person')),
         c.Where(e.Equal(e.Identifier('person_id'), 1)),
@@ -13,8 +13,8 @@ def test_select_for_update(engine, c, e, f, q):
     '''.strip())
 
 
-def test_select_lock_in_share_mode(engine, c, e, q):
-    sql = q.Select(
+def test_select_lock_in_share_mode(engine, c, e, s):
+    sql = s.Select(
         c.Select(star),
         c.From(e.Identifier('person')),
         c.Where(e.Equal(e.Identifier('person_id'), 1)),
@@ -25,8 +25,8 @@ def test_select_lock_in_share_mode(engine, c, e, q):
     )
 
 
-def test_insert_on_duplicate_key_update(engine, c, e, m, q):
-    sql = q.Insert(
+def test_insert_on_duplicate_key_update(engine, c, e, m, s):
+    sql = s.Insert(
         c.InsertInto(e.Identifier('person')),
         c.Values(m.List('mosky', 'Mosky Liu')),
         c.OnDuplicateKeyUpdate(m.Assign(e.Identifier('name'), 'Mosky Liu')),
@@ -38,8 +38,8 @@ def test_insert_on_duplicate_key_update(engine, c, e, m, q):
     )
 
 
-def test_replace(engine, c, e, m, q):
-    sql = q.Replace(
+def test_replace(engine, c, e, m, s):
+    sql = s.Replace(
         c.ReplaceInto(e.Identifier('person')),
         c.Columns(m.List(e.Identifier('person_id'), e.Identifier('name'))),
         c.Values(m.List('mosky', 'Mosky Liu')),

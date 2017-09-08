@@ -5,12 +5,12 @@ from sqlian.standard import (
     constants as n,
     expressions as e,
     functions as f,
-    queries as q,
+    statements as s,
 )
 
 
 def test_select(engine):
-    sql = q.Select(
+    sql = s.Select(
         c.Select(e.Identifier('name')),
         c.From(e.Identifier('person')),
     )
@@ -18,7 +18,7 @@ def test_select(engine):
 
 
 def test_select_where(engine):
-    sql = q.Select(
+    sql = s.Select(
         c.Select(e.Identifier('name')),
         c.From(e.Identifier('person')),
         c.Where(False)
@@ -29,7 +29,7 @@ def test_select_where(engine):
 
 
 def test_select_where_condition(engine):
-    sql = q.Select(
+    sql = s.Select(
         c.Select(e.Identifier('name')),
         c.From(e.Identifier('person')),
         c.Where(e.Or(
@@ -43,14 +43,14 @@ def test_select_where_condition(engine):
 
 
 def test_select_where_subquery_as(engine):
-    sql = q.Select(
+    sql = s.Select(
         c.Select(
             e.Identifier('t', n.star),
             m.As(e.Add(e.Identifier('a'), e.Identifier('b')),
                  e.Identifier('total')),
         ),
         c.From(m.As(m.List(
-            q.Select(
+            s.Select(
                 c.Select(
                     m.As(f.Sum(e.Identifier('c1')), e.Identifier('a')),
                     m.As(f.Sum(e.Identifier('c2')), e.Identifier('b')),

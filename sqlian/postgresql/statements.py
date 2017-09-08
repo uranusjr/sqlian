@@ -1,7 +1,7 @@
 # Inject everything from standard SQL.
-from sqlian.standard.queries import *   # noqa
+from sqlian.standard.statements import *    # noqa
 
-from sqlian.standard.queries import (
+from sqlian.standard.statements import (
     __all__,
     Insert as StandardInsert,
     Select as StandardSelect,

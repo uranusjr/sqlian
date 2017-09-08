@@ -3,7 +3,7 @@ from sqlian.standard.engines import Engine as BaseEngine
 
 class Engine(BaseEngine):
 
-    from . import clauses, queries
+    from . import clauses, statements
 
     identifier_quote = '`'
 

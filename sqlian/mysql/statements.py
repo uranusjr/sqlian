@@ -1,8 +1,8 @@
 # Inject everything from standard SQL.
-from sqlian.standard.queries import *   # noqa
+from sqlian.standard.statements import *    # noqa
 
-from sqlian.standard.queries import (
-    __all__, Query,
+from sqlian.standard.statements import (
+    __all__, Statement,
     Insert as StandardInsert,
     Select as StandardSelect,
 )
@@ -25,7 +25,7 @@ class Select(StandardSelect):
     ]
 
 
-class Replace(Query):
+class Replace(Statement):
     sql_name = 'REPLACE'
     param_classes = [
         ('replace', c.ReplaceInto),

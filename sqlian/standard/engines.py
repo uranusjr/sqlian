@@ -27,18 +27,19 @@ def ensure_sql_wrapped(func):
     return ensure_sql(func)
 
 
-def query_builder(f):
-    """Convert decorated callable to a query builder.
+def statement_builder(f):
+    """Convert decorated callable to build a statement.
 
-    The decorated callable should return a 3-tuple of the query class,
-    the args, and kwargs to build to the query. This decorator parses the
-    arguments into appropriate clauses, and instantiate an instance of
-    query class with those clauses.
+    The decorated callable should return a 3-tuple, containing the statement
+    class's name, the args, and kwargs to build the statement. This decorator
+    parses the arguments into appropriate clauses, and instantiate a statement
+    instance with those clauses.
     """
     @functools.wraps(f)
     def wrapped(self, *args, **kwargs):
-        query_klass, args, kwargs = f(self, *args, **kwargs)
-        param_cls = {k: klass for k, klass in query_klass.param_classes}
+        klass_name, args, kwargs = f(self, *args, **kwargs)
+        statement_klass = getattr(self.statements, klass_name)
+        param_cls = {k: klass for k, klass in statement_klass.param_classes}
         native_args, clause_args = map(
             list, partition(lambda arg: isinstance(arg, Clause), args),
         )
@@ -47,7 +48,7 @@ def query_builder(f):
 
         # Convert native arguments into an extra clause.
         if native_args:
-            klass = query_klass.default_param_class
+            klass = statement_klass.default_param_class
             prepend_args.append(
                 klass.parse(native_args[0], self) if len(native_args) == 1
                 else klass.parse(native_args, self)
@@ -55,14 +56,13 @@ def query_builder(f):
 
         # Convert kwargs into extra clauses.
         for key, arg in kwargs.items():
-            if key in query_klass.param_aliases:
-                key = query_klass.param_aliases[key]
+            if key in statement_klass.param_aliases:
+                key = statement_klass.param_aliases[key]
             prepend_args.append(param_cls[key].parse(arg, self))
 
-        query = query_klass(*(prepend_args + clause_args))
-        return query.__sql__(self)
+        statement = statement_klass(*(prepend_args + clause_args))
+        return statement.__sql__(self)
 
-    wrapped.__query_builder__ = True
     return wrapped
 
 
@@ -123,11 +123,11 @@ class Engine(BaseEngine):
     """Engine that emits ANSI-compliant SQL.
     """
     from . import (
-        clauses, compositions, constants, expressions, functions, queries,
+        clauses, compositions, constants, expressions, functions, statements,
     )
 
     # Perform "from X import *" for these modules.
-    # Clauses and queries are NOT loaded into the top scope because they
+    # Clauses and statements are NOT loaded into the top scope because they
     # are always acceible by engine methods and their kwargs.
     locals().update({k: v for k, v in iter_all_members(
         compositions, constants, expressions, functions,
@@ -201,13 +201,13 @@ class Engine(BaseEngine):
 
     # Shorthand methods.
 
-    @query_builder
+    @statement_builder
     def select(self, *args, **kwargs):
         if not args and 'select' not in kwargs:
             kwargs['select'] = self.star
-        return self.queries.Select, args, kwargs
+        return 'Select', args, kwargs
 
-    @query_builder
+    @statement_builder
     def insert(self, *args, **kwargs):
         # Unpack mapping 'values' kwarg into 'columns' and 'values' kwargs.
         # This only happens if the 'columns' kwarg is not already set.
@@ -227,15 +227,15 @@ class Engine(BaseEngine):
                     'columns': columns,
                     'values': [[d[k] for k in columns] for d in values_kwarg],
                 })
-        return self.queries.Insert, args, kwargs
+        return 'Insert', args, kwargs
 
-    @query_builder
+    @statement_builder
     def update(self, *args, **kwargs):
-        return self.queries.Update, args, kwargs
+        return 'Update', args, kwargs
 
-    @query_builder
+    @statement_builder
     def delete(self, *args, **kwargs):
-        return self.queries.Delete, args, kwargs
+        return 'Delete', args, kwargs
 
     def join(self, join_item, on=None, using=None, join_type=''):
         if on is not None and using is not None:

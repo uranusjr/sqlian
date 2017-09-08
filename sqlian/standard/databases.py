@@ -62,20 +62,20 @@ class Database(object):
 
     # Things!
 
-    def perform_query(self, name, args, kwargs):
-        query = getattr(self._engine, name)(*args, **kwargs)
+    def execute_statement(self, name, args, kwargs):
+        statement = getattr(self._engine, name)(*args, **kwargs)
         cursor = self._conn.cursor()
-        cursor.execute(query)
+        cursor.execute(statement)
         return RecordCollection.from_cursor(cursor)
 
     def select(self, *args, **kwargs):
-        return self.perform_query('select', args, kwargs)
+        return self.execute_statement('select', args, kwargs)
 
     def insert(self, *args, **kwargs):
-        return self.perform_query('insert', args, kwargs)
+        return self.execute_statement('insert', args, kwargs)
 
     def update(self, *args, **kwargs):
-        return self.perform_query('update', args, kwargs)
+        return self.execute_statement('update', args, kwargs)
 
     def delete(self, *args, **kwargs):
-        return self.perform_query('delete', args, kwargs)
+        return self.execute_statement('delete', args, kwargs)

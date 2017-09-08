@@ -4,34 +4,34 @@ from . import clauses as c
 
 
 __all__ = [
-    'Query', 'QueryError', 'DuplicateClauseError', 'InvalidClauseError',
-    'Select', 'Insert', 'Update', 'Delete',
+    'StatementError', 'DuplicateClauseError', 'InvalidClauseError',
+    'Statement', 'Select', 'Insert', 'Update', 'Delete',
 ]
 
 
-class QueryError(ValueError):
-    def __init__(self, clause_name, query_name):
-        super(QueryError, self).__init__(self.error_template.format(
-            clause=clause_name, query=query_name,
+class StatementError(ValueError):
+    def __init__(self, clause_name, statement_name):
+        super(StatementError, self).__init__(self.error_template.format(
+            clause=clause_name, statement=statement_name,
         ))
-        self.clause = clause_name
-        self.query = query_name
+        self.clause_name = clause_name
+        self.statement_name = statement_name
 
 
-class DuplicateClauseError(QueryError):
-    error_template = 'duplicate {clause} clauses for query {query}'
+class DuplicateClauseError(StatementError):
+    error_template = 'duplicate {clause} clauses for statement {statement}'
 
 
-class InvalidClauseError(QueryError):
-    error_template = 'Query {query} does not accept clause {clause}'
+class InvalidClauseError(StatementError):
+    error_template = 'Statement {statement} does not accept clause {clause}'
 
 
-class Query(object):
+class Statement(object):
 
     param_aliases = ()
 
     def __init__(self, *args):
-        super(Query, self).__init__()
+        super(Statement, self).__init__()
         self.param_clauses = self._map_clause_to_params(args)
 
     def __repr__(self):
@@ -71,7 +71,7 @@ class Query(object):
         return param_clauses
 
 
-class Select(Query):
+class Select(Statement):
     sql_name = 'SELECT'
     param_classes = [
         ('select', c.Select),
@@ -91,7 +91,7 @@ class Select(Query):
     }
 
 
-class Insert(Query):
+class Insert(Statement):
     sql_name = 'INSERT'
     param_classes = [
         ('insert', c.InsertInto),
@@ -101,7 +101,7 @@ class Insert(Query):
     default_param_class = c.InsertInto
 
 
-class Update(Query):
+class Update(Statement):
     sql_name = 'UPDATE'
     param_classes = [
         ('update', c.Update),
@@ -112,7 +112,7 @@ class Update(Query):
     param_aliases = {'set_': 'set'}
 
 
-class Delete(Query):
+class Delete(Statement):
     sql_name = 'DELETE'
     param_classes = [
         ('delete', c.DeleteFrom),

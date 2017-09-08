@@ -29,5 +29,5 @@ def m(engine):
 
 
 @pytest.fixture
-def q(engine):
-    return engine.queries
+def s(engine):
+    return engine.statements

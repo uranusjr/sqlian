@@ -4,8 +4,8 @@ Quickstart
 SQLian is composed of three main parts:
 
 * **Connectors** connect to a database.
-* **Queries** take native objects and convert them to a SQL command. The
-  command can then be executed by the connector in the database.
+* **Statement builders** take native objects and convert them to a SQL command
+  string. The command can then be executed by the connector in the database.
 * **Records** are wrappers providing a clean, nice interface to interact with
   the database cursor, and the data it retrieves.
 
@@ -37,11 +37,11 @@ DB-API 2.0 specification (`PEP 249`_), so you can get to work directly if you
 know your way around. But there's a better way to do it.
 
 
-Making queries
----------------
+Issuing commands
+-----------------
 
 Aside from the DB-API 2.0-compatible stuff, the `Connection` object also
-provides a rich set of "query builders" that frees you from formatting SQL
+provides a rich set of "statement builders" that frees you from formatting SQL
 yourself, and convert native Python objects more easily for SQL usage.
 
 Let's insert some data first:
@@ -95,14 +95,14 @@ You'd guess how deletion works by now, so let's add a little twist:
 
     db.delete('person', where={'occupation !=': 'Pinkoi'})
 
-The query build automatically parse trailing operators and do the right thing.
+The builder automatically parse trailing operators and do the right thing.
 
 
 Handling results
 -----------------
 
-Some queries produce data. For every query, SQLian returns an iterable object
-so you can handle those data.
+Some statements produce data. For every query, SQLian returns an iterable
+object so you can handle those data.
 
 .. code-block:: pycon
 
