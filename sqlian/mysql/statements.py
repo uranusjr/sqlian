@@ -28,7 +28,7 @@ class Select(StandardSelect):
 class Replace(Statement):
     sql_name = 'REPLACE'
     param_classes = [
-        ('replace', c.ReplaceInto),
+        ('into', c.ReplaceInto),
         ('columns', c.Columns),
         ('values', c.Values),
     ]

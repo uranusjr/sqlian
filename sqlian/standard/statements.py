@@ -94,7 +94,7 @@ class Select(Statement):
 class Insert(Statement):
     sql_name = 'INSERT'
     param_classes = [
-        ('insert', c.InsertInto),
+        ('into', c.InsertInto),
         ('columns', c.Columns),
         ('values', c.Values),
     ]
@@ -115,7 +115,7 @@ class Update(Statement):
 class Delete(Statement):
     sql_name = 'DELETE'
     param_classes = [
-        ('delete', c.DeleteFrom),
+        ('from_', c.DeleteFrom),
         ('where', c.Where),
     ]
     default_param_class = c.DeleteFrom
