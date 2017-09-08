@@ -20,7 +20,7 @@ Sneak Peek
 Connect to a database::
 
     import sqlian
-    db = sqlian.connect('postgresql:://me:pa55@localhost/contactbook')
+    db = sqlian.connect('postgresql:://user:pa55@localhost/contactbook')
 
 
 Perform a query::
