@@ -31,3 +31,9 @@ class Engine(BaseEngine):
 
     def escape_string(self, value):
         return ''.join(self.string_escape_map.get(c, c) for c in value)
+
+    def replace(self, *args, **kwargs):
+        return self.build_sql(self.statements.Replace, args, kwargs)
+
+    def replace_into(self, *args, **kwargs):
+        return self.replace(*args, **kwargs)

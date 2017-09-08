@@ -27,45 +27,6 @@ def ensure_sql_wrapped(func):
     return ensure_sql(func)
 
 
-def statement_builder(f):
-    """Convert decorated callable to build a statement.
-
-    The decorated callable should return a 3-tuple, containing the statement
-    class's name, the args, and kwargs to build the statement. This decorator
-    parses the arguments into appropriate clauses, and instantiate a statement
-    instance with those clauses.
-    """
-    @functools.wraps(f)
-    def wrapped(self, *args, **kwargs):
-        klass_name, args, kwargs = f(self, *args, **kwargs)
-        statement_klass = getattr(self.statements, klass_name)
-        param_cls = {k: klass for k, klass in statement_klass.param_classes}
-        native_args, clause_args = map(
-            list, partition(lambda arg: isinstance(arg, Clause), args),
-        )
-
-        prepend_args = []
-
-        # Convert native arguments into an extra clause.
-        if native_args:
-            klass = statement_klass.default_param_class
-            prepend_args.append(
-                klass.parse(native_args[0], self) if len(native_args) == 1
-                else klass.parse(native_args, self)
-            )
-
-        # Convert kwargs into extra clauses.
-        for key, arg in kwargs.items():
-            if key in statement_klass.param_aliases:
-                key = statement_klass.param_aliases[key]
-            prepend_args.append(param_cls[key].parse(arg, self))
-
-        statement = statement_klass(*(prepend_args + clause_args))
-        return statement.__sql__(self)
-
-    return wrapped
-
-
 class Join(object):
     """Proxy callable for Engine.join() with sub-callables.
 
@@ -201,13 +162,41 @@ class Engine(BaseEngine):
 
     # Shorthand methods.
 
-    @statement_builder
+    def build_sql(self, statement_klass, args, kwargs):
+        """Build a statement from arguments.
+
+        This method parses the arguments into appropriate clauses, and
+        returns a statement instance built with those clauses.
+        """
+        param_cls = {k: klass for k, klass in statement_klass.param_classes}
+        native_args, clause_args = map(
+            list, partition(lambda arg: isinstance(arg, Clause), args),
+        )
+
+        prepend_args = []
+
+        # Convert native arguments into an extra clause.
+        if native_args:
+            klass = statement_klass.default_param_class
+            prepend_args.append(
+                klass.parse(native_args[0], self) if len(native_args) == 1
+                else klass.parse(native_args, self)
+            )
+
+        # Convert kwargs into extra clauses.
+        for key, arg in kwargs.items():
+            if key in statement_klass.param_aliases:
+                key = statement_klass.param_aliases[key]
+            prepend_args.append(param_cls[key].parse(arg, self))
+
+        statement = statement_klass(*(prepend_args + clause_args))
+        return statement.__sql__(self)
+
     def select(self, *args, **kwargs):
         if not args and 'select' not in kwargs:
             kwargs['select'] = self.star
-        return 'Select', args, kwargs
+        return self.build_sql(self.statements.Select, args, kwargs)
 
-    @statement_builder
     def insert(self, *args, **kwargs):
         # Unpack mapping 'values' kwarg into 'columns' and 'values' kwargs.
         # This only happens if the 'columns' kwarg is not already set.
@@ -227,15 +216,19 @@ class Engine(BaseEngine):
                     'columns': columns,
                     'values': [[d[k] for k in columns] for d in values_kwarg],
                 })
-        return 'Insert', args, kwargs
+        return self.build_sql(self.statements.Insert, args, kwargs)
 
-    @statement_builder
+    def insert_into(self, *args, **kwargs):
+        return self.insert(*args, **kwargs)
+
     def update(self, *args, **kwargs):
-        return 'Update', args, kwargs
+        return self.build_sql(self.statements.Update, args, kwargs)
 
-    @statement_builder
     def delete(self, *args, **kwargs):
-        return 'Delete', args, kwargs
+        return self.build_sql(self.statements.Delete, args, kwargs)
+
+    def delete_from(self, *args, **kwargs):
+        return self.delete(*args, **kwargs)
 
     def join(self, join_item, on=None, using=None, join_type=''):
         if on is not None and using is not None:
