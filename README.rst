@@ -14,13 +14,13 @@ SQLian
 A good SQLian like a good shepherd. I handle SQL strings so you don’t have to.
 
 
-The Basics
+Sneak Peek
 ============
 
 Connect to a database::
 
     import sqlian
-    db = sqlian.connect('sqlite://:memory:')
+    db = sqlian.connect('postgresql:://me:pa55@localhost/contactbook')
 
 
 Perform a query::
@@ -32,7 +32,7 @@ Perform a query::
     )
 
 
-You can access the data directly::
+Access the data directly::
 
     >>> rows[0]
     <Record {"name": "Mosky", "occupation": "Pinkoi"}>
@@ -44,4 +44,4 @@ Or iterate over them::
         print('{} works at {}'.format(r.name, r.occupation))
 
 
-And much more! `Read the documentation. <https://sqlian.readthedocs.io/en/latest/#table-of-contents>`__
+Want more? `Read the documentation. <https://sqlian.readthedocs.io/en/latest/#table-of-contents>`__
