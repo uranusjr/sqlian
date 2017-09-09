@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "83f04e30541e4a01fd33895a0a4549739eb8d1270764752ea89262bd66ce04c5"
+            "sha256": "c095e0aed6a1cbd0009d527d83370a328f650e932eca717684ecfcf0a2e4ca75"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
@@ -161,6 +161,13 @@
             ],
             "version": "==0.6.1"
         },
+        "pkginfo": {
+            "hashes": [
+                "sha256:31a49103180ae1518b65d3f4ce09c784e2bc54e338197668b4fb7dc539521024",
+                "sha256:bb1a6aeabfc898f5df124e7e00303a5b3ec9a489535f346bfbddb081af93f89e"
+            ],
+            "version": "==1.4.1"
+        },
         "py": {
             "hashes": [
                 "sha256:2ccb79b01769d99115aa600d7eed99f524bf752bba8f041dc1c184853514655a",
@@ -230,6 +237,13 @@
             ],
             "version": "==2.18.4"
         },
+        "requests-toolbelt": {
+            "hashes": [
+                "sha256:42c9c170abc2cacb78b8ab23ac957945c7716249206f90874651971a4acff237",
+                "sha256:f6a531936c6fa4c6cfce1b9c10d5c4f498d16528d2a54a22ca00011205a187b5"
+            ],
+            "version": "==0.8.0"
+        },
         "six": {
             "hashes": [
                 "sha256:0ff78c403d9bccf5a425a6d31a12aa6b47f1c21ca4dc2573a7e2f32a97335eb1",
@@ -264,6 +278,20 @@
                 "sha256:7a85961326aa3a400cd4ad3c816d70ed6f7c740acd7ce5d78cd0a67825072eb9"
             ],
             "version": "==1.0.1"
+        },
+        "tqdm": {
+            "hashes": [
+                "sha256:9f019dcbec25b5b4cb1bbf43e5c346e0d6a001fe4f598d70283d379e5314e202",
+                "sha256:6ec1dc74efacf2cda936b4a6cf4082ce224c76763bdec9f17e437c8cfcaa9953"
+            ],
+            "version": "==4.15.0"
+        },
+        "twine": {
+            "hashes": [
+                "sha256:d3ce5c480c22ccfb761cd358526e862b32546d2fe4bc93d46b5cf04ea3cc46ca",
+                "sha256:caa45b7987fc96321258cd7668e3be2ff34064f5c66d2d975b641adca659c1ab"
+            ],
+            "version": "==1.9.1"
         },
         "urllib3": {
             "hashes": [

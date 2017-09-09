@@ -7,8 +7,9 @@ pytest = "*"
 pytest-cov = "*"
 pytest-pythonpath = "*"
 flake8 = "*"
-Sphinx = "*"
-sphinx_rtd_theme = "*"
+sphinx = "*"
+sphinx-rtd-theme = "*"
+twine = "*"
 
 [packages]
 six = "*"

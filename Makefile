@@ -1,6 +1,6 @@
 ALL: help
 
-.PHONY: help docs test tox watch
+.PHONY: help build check clean docs lint test tox upload watch
 
 help:
 	@echo 'Available commands:'
@@ -12,8 +12,16 @@ help:
 	@echo '  tox   - Run tests for all platforms with Tox'
 	@echo '  watch - Start Sphinx autobuild watcher'
 
+build: clean
+	pipenv run python setup.py sdist bdist_wheel
+
 check:
 	pipenv run python setup.py check --restructuredtext --strict
+
+clean:
+	rm -rf build dist *.egg-info
+	find . -name \*.pyc -delete
+	find . -name __pycache__ -exec rm -r {} +
 
 docs:
 	make -C docs html
@@ -26,6 +34,9 @@ test: lint
 
 tox:
 	tox
+
+upload: build
+	pipenv run twine upload dist/*
 
 # This requires sphinx-autobuild. It is not listed in the Pipfile because
 # PyPy3 does not like it and causes CI to fail. :(
