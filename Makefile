@@ -4,13 +4,15 @@ ALL: help
 
 help:
 	@echo 'Available commands:'
-	@echo '  help  - Display this message and exist'
-	@echo '  check - Check package metadata for PyPI publish'
-	@echo '  docs  - Build documentation with Sphinx'
-	@echo '  lint  - Lint sources with Flake8'
-	@echo '  test  - Run tests (implies linting)'
-	@echo '  tox   - Run tests for all platforms with Tox'
-	@echo '  watch - Start Sphinx autobuild watcher'
+	@echo '  help   - Display this message and exist'
+	@echo '  build  - Rebuild package for PyPI publish (implies clean)'
+	@echo '  check  - Check package metadata for PyPI publish'
+	@echo '  clean  - Clean package artifects'
+	@echo '  docs   - Build documentation with Sphinx'
+	@echo '  lint   - Lint sources with Flake8'
+	@echo '  test   - Run tests (implies lint)'
+	@echo '  tox    - Run tests for all platforms with Tox'
+	@echo '  upload - Upload package to PyPI (implies build)'
 
 build: clean
 	pipenv run python setup.py sdist bdist_wheel
@@ -29,6 +31,9 @@ docs:
 lint:
 	pipenv run flake8 --isolated
 
+open:
+	open docs/build/html/index.html
+
 test: lint
 	pipenv run pytest
 
@@ -37,8 +42,3 @@ tox:
 
 upload: build
 	pipenv run twine upload dist/*
-
-# This requires sphinx-autobuild. It is not listed in the Pipfile because
-# PyPy3 does not like it and causes CI to fail. :(
-watch:
-	pipenv run sphinx-autobuild docs/source docs/build/html
