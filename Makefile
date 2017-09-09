@@ -31,7 +31,7 @@ docs:
 lint:
 	pipenv run flake8 --isolated
 
-open:
+open: docs
 	open docs/build/html/index.html
 
 test: lint

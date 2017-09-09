@@ -1,3 +1,12 @@
+"""The record API and accompanying classes.
+
+Things in this module are strongly inspired by the `Recrods library by Kenneth
+Reitz <https://github.com/kennethreitz/records>`__, but with some subtle
+differences on how things interact with the database.
+
+.. currentmodule:: sqlian.records
+"""
+
 import collections
 import json
 
@@ -9,6 +18,9 @@ __all__ = ['Record', 'RecordCollection']
 
 class Record(object):
     """A single row of data from a database.
+
+    You typically don't need to create instances of this class, but interact
+    with instances returned by a :class:`sqlian.standard.Database` query.
     """
     def __init__(self, keys, values):
         self._keys = keys
@@ -21,11 +33,16 @@ class Record(object):
         ))))
 
     def __len__(self):
+        """How many columns there are in this row.
+        """
         return len(self._keys)
 
     def __eq__(self, other):
-        # Two records are equal if their keys and values match.
-        # Ordering matters!
+        """Test record equality.
+
+        Two records are equal if their keys and values both match.
+        Ordering matters.
+        """
         try:
             other_keys = other.keys()
             other_vals = other.values()
@@ -34,6 +51,14 @@ class Record(object):
         return self.keys() == other_keys and self.values() == other_vals
 
     def __getitem__(self, key):
+        """Access content in the record.
+
+        Records support both numeric (sequence-like) and string (mapping-like)
+        indexing.
+
+        Slicing is not supported. Use the :meth:`values` method, which returns
+        a slicible object.
+        """
         # Numeric indexing.
         if isinstance(key, six.integer_types):
             if key < len(self._keys):
@@ -46,6 +71,13 @@ class Record(object):
         raise KeyError(key)
 
     def __getattr__(self, key):
+        """Access content in the record.
+
+        This works like the string indexing of :meth:`__getitem__` to provide
+        a simpler syntax under common usage. Always prefer :meth:`__getitem__`
+        (the square bracket syntax) if you want to access columns with a
+        variable.
+        """
         if key in self._key_indexes:
             return self._values[self._key_indexes[key]]
         raise AttributeError(
@@ -53,18 +85,35 @@ class Record(object):
         )
 
     def get(self, key, default=None):
+        """Get an item in the record, return `default` on failure.
+
+        This works similarly with the standard mapping interface, but also
+        supports numeric indexing.
+        """
         try:
             return self[key]
-        except KeyError:
+        except (KeyError, IndexError):
             return default
 
     def keys(self):
+        """Returns a sequence containing keys (column names) in this row.
+
+        This works similarly with the standard mapping interface.
+        """
         return tuple(self._keys)
 
     def values(self):
+        """Returns a sequence containing values in this row.
+
+        This works similarly with the standard mapping interface.
+        """
         return tuple(self._values)
 
     def items(self):
+        """Returns an iterable of 2-tuples containing keys and values.
+
+        This works similarly with the standard mapping interface.
+        """
         return zip(self._keys, self._values)
 
 
@@ -93,6 +142,10 @@ class CursorIterator(object):
 
 class RecordCollection(object):
     """A sequence of records.
+
+    Record collections are backed by record *generators*. Results are fetched
+    on demand. This class conforms to the standard sequence interface, and can
+    be seamlessly treated as such.
     """
     def __init__(self, record_generator):
         self._row_gen = record_generator
@@ -101,7 +154,12 @@ class RecordCollection(object):
 
     @classmethod
     def from_cursor(cls, cursor):
-        """A shorthand to create a `RecordCollection` from a DB-API 2.0 cursor.
+        """Create a :class:`RecordCollection` from a DB-API 2.0 cursor.
+
+        This method automatically extract useful information for DB-API 2.0
+        to generate records. Discrepencies in various interfaces are generally
+        taken care of by this method, and you should use it instead of the
+        basic constructor when returning records for a database query.
         """
         if isinstance(cursor.description, collections.Sequence):
             keys = tuple(desc[0] for desc in cursor.description)

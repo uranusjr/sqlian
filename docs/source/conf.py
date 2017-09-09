@@ -19,11 +19,13 @@
 #
 import os
 
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import sys
 
 
 PROJECT_ROOT = os.path.abspath(os.path.join(__file__, '..', '..', '..'))
+
+# Make the module available for autodoc.
+sys.path.insert(0, PROJECT_ROOT)
 
 
 # -- General configuration ------------------------------------------------
@@ -37,6 +39,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(__file__, '..', '..', '..'))
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

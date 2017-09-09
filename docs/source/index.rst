@@ -59,9 +59,10 @@ Table of Contents
 ==================
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   installation
-   quickstart
-   inspirations
-   indices-and-tables
+    installation
+    quickstart
+    references
+    inspirations
+    indices-and-tables
