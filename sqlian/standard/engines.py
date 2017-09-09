@@ -21,40 +21,30 @@ def ensure_sql(f):
     return wrapped
 
 
-def ensure_sql_wrapped(func):
-    if getattr(func, '__sql_ensured__', False):
-        return func
-    return ensure_sql(func)
+class CallableProxy(object):
+    """Proxy callable to make it editable.
 
-
-class Join(object):
-    """Proxy callable for Engine.join() with sub-callables.
-
-    Attributes on this callable object represent join variants.
+    This is to work around bounded methods not being editable on Python 2.
     """
-    def __init__(self, engine, join_f, join_types):
-        super(Join, self).__init__()
-        self.join_f = join_f
-
-        # Populate join variants based on possible join types.
-        # Example: join.natural_cross('table', on={'x.a': 'table.a'})
-        for join_type in join_types:
-            name = join_type.lower().replace(' ', '_')
-            setattr(self, name, functools.partial(
-                join_f, engine, join_type=join_type,
-            ))
+    def __new__(cls, f):
+        self = super(CallableProxy, cls).__new__(cls)
+        self = compat.update_wrapper(self, f)
+        return self
 
     def __call__(self, *args, **kwargs):
-        return self.join_f(*args, **kwargs)
+        return self.__wrapped__(*args, **kwargs)
 
 
 class EngineMeta(type):
-    def __new__(meta, name, bases, attrdict):
+    """Metaclass to ensure some engine methods do what we want.
+    """
+    def __new__(meta, name, bases, attrs):
         # Ensure formatter methods return a ``Sql`` instance.
-        for key in list(six.iterkeys(attrdict)):
-            if key.startswith('format_') or key.startswith('as_'):
-                attrdict[key] = ensure_sql_wrapped(attrdict[key])
-        return super(EngineMeta, meta).__new__(meta, name, bases, attrdict)
+        for key in list(six.iterkeys(attrs)):
+            if (key in ('as_value', 'as_identifier') and
+                    not getattr(attrs[key], '__sql_ensured__', False)):
+                attrs[key] = ensure_sql(attrs[key])
+        return super(EngineMeta, meta).__new__(meta, name, bases, attrs)
 
 
 @six.add_metaclass(EngineMeta)
@@ -66,10 +56,42 @@ class BaseEngine(object):
         # Replace the join method with a proxy callable, and set
         # sub-callables on it.
         with compat.suppress(AttributeError):
-            self.join = Join(
-                self, type(self).join,
-                (t for t in self.compositions.ALLOWED_JOIN_TYPES if t),
+            proxy = CallableProxy(type(self).join)
+            for join_type in self.compositions.ALLOWED_JOIN_TYPES:
+                name = join_type.lower().replace(' ', '_')
+                var = functools.partial(proxy, self, join_type=join_type)
+                setattr(proxy, name, var)
+            self.join = proxy
+
+    def build_sql(self, statement_klass, args, kwargs):
+        """Build a statement from arguments.
+
+        This method parses the arguments into appropriate clauses, and
+        returns a statement instance built with those clauses.
+        """
+        param_cls = {k: klass for k, klass in statement_klass.param_classes}
+        native_args, clause_args = map(
+            list, partition(lambda arg: isinstance(arg, Clause), args),
+        )
+
+        prepend_args = []
+
+        # Convert native arguments into an extra clause.
+        if native_args:
+            klass = statement_klass.default_param_class
+            prepend_args.append(
+                klass.parse(native_args[0], self) if len(native_args) == 1
+                else klass.parse(native_args, self)
             )
+
+        # Convert kwargs into extra clauses.
+        for key, arg in kwargs.items():
+            if key in statement_klass.param_aliases:
+                key = statement_klass.param_aliases[key]
+            prepend_args.append(param_cls[key].parse(arg, self))
+
+        statement = statement_klass(*(prepend_args + clause_args))
+        return statement.__sql__(self)
 
 
 def iter_all_members(*modules):
@@ -161,36 +183,6 @@ class Engine(BaseEngine):
         raise UnescapableError(name)
 
     # Shorthand methods.
-
-    def build_sql(self, statement_klass, args, kwargs):
-        """Build a statement from arguments.
-
-        This method parses the arguments into appropriate clauses, and
-        returns a statement instance built with those clauses.
-        """
-        param_cls = {k: klass for k, klass in statement_klass.param_classes}
-        native_args, clause_args = map(
-            list, partition(lambda arg: isinstance(arg, Clause), args),
-        )
-
-        prepend_args = []
-
-        # Convert native arguments into an extra clause.
-        if native_args:
-            klass = statement_klass.default_param_class
-            prepend_args.append(
-                klass.parse(native_args[0], self) if len(native_args) == 1
-                else klass.parse(native_args, self)
-            )
-
-        # Convert kwargs into extra clauses.
-        for key, arg in kwargs.items():
-            if key in statement_klass.param_aliases:
-                key = statement_klass.param_aliases[key]
-            prepend_args.append(param_cls[key].parse(arg, self))
-
-        statement = statement_klass(*(prepend_args + clause_args))
-        return statement.__sql__(self)
 
     def select(self, *args, **kwargs):
         if not args and 'select' not in kwargs:
