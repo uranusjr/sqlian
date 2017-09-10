@@ -26,7 +26,7 @@ clean:
 	find . -name __pycache__ -exec rm -r {} +
 
 docs:
-	make -C docs html
+	cd docs && make html
 
 lint:
 	pipenv run flake8 --isolated
