@@ -1,6 +1,6 @@
 import pytest
 
-from sqlian import star
+from sqlian import connect, star
 from sqlian.sqlite import SQLite3Database
 
 
@@ -47,3 +47,18 @@ def test_insert(db):
     assert not rows
     names = [r.name for r in db.select('name', from_='person')]
     assert names == ['Mosky', 'Keith']
+
+
+@pytest.mark.parametrize('scheme', ['sqlite', 'sqlite3+sqlite'])
+def test_connect(tmpdir, scheme):
+    dbpath = tmpdir.join('sqlian-connect-test.sqlite3')
+    db = connect('{scheme}:///{path}'.format(scheme=scheme, path=dbpath))
+    assert db.is_open()
+
+    cursor = db.cursor()
+    cursor.execute('''CREATE TABLE "person" ("name" TEXT)''')
+    cursor.execute('''INSERT INTO "person" VALUES ('Mosky')''')
+    cursor.close()
+
+    record, = db.select(star, from_='person')
+    assert record.name == 'Mosky'

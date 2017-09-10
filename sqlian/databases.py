@@ -47,7 +47,18 @@ def register(scheme, klass, replaces_existing=False):
     six.moves.urllib.parse.uses_netloc.append(scheme)
 
 
-register('sqlite', 'sqlian.sqlite.databases.Database')
+# TODO: These don't actually work yet.
+
+# register('mysql', 'sqlian.mysql.MySQLDBDatabase')
+# register('mysqldb+mysql', 'sqlian.mysql.MySQLDBDatabase')
+# register('pymysql+mysql', 'sqlian.mysql.PyMySQLDatabase')
+
+# register('postgresql', 'sqlian.postgresql.Psycopg2Database')
+# register('psycopg2+postgresql', 'sqlian.postgresql.Psycopg2Database')
+# register('py-postgresql+postgresql','sqlian.postgresql.PyPostgreSQLDatabase')
+
+register('sqlite', 'sqlian.sqlite.SQLite3Database')
+register('sqlite3+sqlite', 'sqlian.sqlite.SQLite3Database')
 
 
 IN_MEMORY_DB_PATTERN = re.compile(r'^(?P<scheme>\w+)://:memory:$')
