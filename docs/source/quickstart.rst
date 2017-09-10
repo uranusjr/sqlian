@@ -1,3 +1,6 @@
+.. currentmodule:: sqlian
+
+
 Quickstart
 ===========
 
@@ -26,26 +29,26 @@ As an example, let's connect to a PostgreSQL database:
 .. code-block:: python
 
     import sqlian
-    db = sqlian.connect('postgresql:://user:pa55@localhost/contactbook')
+    db = sqlian.connect('postgresql://user:pa55@localhost/contactbook')
 
-SQLian has a few connectors built-in. Some of them requires extra dependencies
-to actually connect to, like ``psycopg2`` for PostgreSQL. You can also build
-your own connectors if SQLian doesn't have them built-in, but we'll save that
-discussion for later.
+SQLian has some database support built-in. Some databases require extra
+dependencies to actually connect to, like ``psycopg2`` for PostgreSQL. You
+can also build your own database support, but we'll save that discussion for
+later.
 
-The `connect()` function returns a `Connection` object, which conforms to the
-DB-API 2.0 specification (`PEP 249`_), so you can get to work directly if you
-know your way around. But there's a better way to do it.
+The `connect()` function returns a :class:`Database` instance, which
+conforms to the DB-API 2.0 specification (`PEP 249`_), so you can get to work
+directly if you know your way around. But there's a better way to do it.
 
 
 Issuing commands
 -----------------
 
-Aside from the DB-API 2.0-compatible stuff, the `Connection` object also
-provides a rich set of "statement builders" that frees you from formatting SQL
-yourself, and convert native Python objects more easily for SQL usage.
+The :class:`Database` instance provides a rich set of "statement builders" that
+format and execute SQL for you, and make it easier to convert native Python
+objects for SQL usage.
 
-Let's insert some data first:
+Inserting data:
 
 .. code-block:: python
 
@@ -65,7 +68,7 @@ This roughly translates to:
 but saves you from dealing with column and value clauses and all those
 ``%(name)s`` stuff.
 
-You can still use column name and value sequences if you have them already:
+You can still use column name–value sequences if you wish to:
 
 .. code-block:: python
 
@@ -80,15 +83,13 @@ You can still use column name and value sequences if you have them already:
 
 Did I mention you can insert multiple rows at one go? Yeah, you can.
 
-It's easy to update data as well:
+It's also easy to update data:
 
 .. code-block:: python
 
     db.update('person', where={'name': 'Adam'}, set={'main_language': 'CSS'})
 
-Notice the key order does not matter. Remember that time you forget a `WHERE`
-clause and mistakenly wipe the whole table? Put it first so you don't miss it
-next time.
+Notice the key ordering does not matter.
 
 You'd guess how deletion works by now, so let's add a little twist:
 
@@ -96,14 +97,14 @@ You'd guess how deletion works by now, so let's add a little twist:
 
     db.delete('person', where={'occupation !=': 'Pinkoi'})
 
-The builder automatically parse trailing operators and do the right thing.
+The builders automatically parse trailing operators and do the right thing.
 
 
 Handling results
 -----------------
 
-Some statements produce data. For every query, SQLian returns an iterable
-object so you can handle those data.
+Some statements produce data. For every such query, SQLian returns an iterable
+object :class:`RecordCollection` so you can handle them.
 
 .. code-block:: pycon
 
@@ -111,7 +112,7 @@ object so you can handle those data.
     >>> rows
     <RecordCollection (pending)>
 
-Accessing the content in any way automatically resolve it:
+Accessing the content in any way automatically resolves it:
 
 .. code-block:: pycon
 
@@ -129,7 +130,7 @@ Accessing the content in any way automatically resolve it:
     >>> rows
     <RecordCollection (2 rows)>
 
-A record can be accessed like a sequence, mapping, or even object:
+A :class:`Record` can be accessed like a sequence, mapping, or even object:
 
 .. code-block:: pycon
 

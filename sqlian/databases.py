@@ -8,7 +8,7 @@ import six
 __all__ = ['DuplicateScheme', 'UnrecognizableScheme', 'register', 'connect']
 
 
-ENGINE_CLASSES = {}
+ENGINE_CLASSES = collections.OrderedDict()
 
 
 class DuplicateScheme(ValueError):
@@ -123,3 +123,13 @@ def connect(url):
         kwargs['options'] = collections.OrderedDict(query_pairs)
 
     return engine_class(**kwargs)
+
+
+# HACK: Dynamically generate a list of available engines in the documentation.
+connect.__doc__ += """
+A list of available schemes:
+
+{}
+""".format('\n'.join(
+    '* ``{}``'.format(key) for key in ENGINE_CLASSES
+))
