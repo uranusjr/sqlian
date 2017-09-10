@@ -40,7 +40,7 @@ def register(scheme, klass, replaces_existing=False):
     """
     if not replaces_existing and scheme in ENGINE_CLASSES:
         raise DuplicateScheme(scheme, ENGINE_CLASSES[scheme])
-    if isinstance(klass, six.text_type):
+    if isinstance(klass, six.string_types):
         module_path, klass_name = klass.rsplit('.', 1)
         klass = getattr(importlib.import_module(module_path), klass_name)
     ENGINE_CLASSES[scheme] = klass
@@ -53,8 +53,8 @@ def register(scheme, klass, replaces_existing=False):
 # register('mysqldb+mysql', 'sqlian.mysql.MySQLDBDatabase')
 # register('pymysql+mysql', 'sqlian.mysql.PyMySQLDatabase')
 
-# register('postgresql', 'sqlian.postgresql.Psycopg2Database')
-# register('psycopg2+postgresql', 'sqlian.postgresql.Psycopg2Database')
+register('postgresql', 'sqlian.postgresql.Psycopg2Database')
+register('psycopg2+postgresql', 'sqlian.postgresql.Psycopg2Database')
 # register('py-postgresql+postgresql','sqlian.postgresql.PyPostgreSQLDatabase')
 
 register('sqlite', 'sqlian.sqlite.SQLite3Database')
