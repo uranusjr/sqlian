@@ -12,9 +12,9 @@ class Psycopg2Database(Database):
     def connect(self, dbapi, **kwargs):
         with compat.suppress(KeyError):
             kwargs['dbname'] = kwargs.pop('database')
-        # See libpq documentation for a list of valid parameter key words.
-        # We don't enforece anything here; the user should be responsible
-        # for whatever is passed in here.
+        # See libpq documentation for a list of valid parameter keywords.
+        # We don't enforece anything; the user should be responsible for
+        # whatever is passed in.
         # https://www.postgresql.org/docs/current/static/libpq-connect.html
         with compat.suppress(KeyError):
             kwargs.update(kwargs.pop('options'))

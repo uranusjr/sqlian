@@ -2,7 +2,7 @@ import warnings
 
 import pytest
 
-from sqlian import star
+from sqlian import connect, star
 from sqlian.mysql import MySQLDBDatabase
 
 
@@ -14,6 +14,7 @@ def database_name(request):
     try:
         conn = MySQLdb.connect()
     except MySQLdb.OperationalError:
+        pytest.skip('database unavailable')
         return None
 
     database_name = 'test_sqlian_mysqldb'
@@ -31,10 +32,6 @@ def database_name(request):
 
 @pytest.fixture
 def db(request, database_name):
-    if not database_name:
-        pytest.skip('database unavailable')
-        return None
-
     db = MySQLDBDatabase(database=database_name)
 
     cursor = db.cursor()
@@ -77,3 +74,28 @@ def test_insert(db):
     assert len(rows) == 0
     names = [r.name for r in db.select('name', from_='person')]
     assert names == ['Mosky', 'Keith']
+
+
+@pytest.mark.parametrize('scheme', ['mysql', 'mysqldb+mysql'])
+def test_connect(database_name, scheme):
+    db = connect('{scheme}:///{db}?charset=utf8&use_unicode=1'.format(
+        scheme=scheme, db=database_name,
+    ))
+    assert db.is_open()
+
+    with db.cursor() as cursor, warnings.catch_warnings():
+        warnings.filterwarnings('ignore')
+        cursor.execute('''DROP TABLE IF EXISTS `person`''')
+        cursor.execute('''CREATE TABLE `person` (`name` TEXT)''')
+        cursor.execute('''INSERT INTO `person` VALUES ('Mosky')''')
+
+    record, = db.select(star, from_='person')
+    assert record.name == 'Mosky'
+
+
+@pytest.mark.parametrize('scheme', ['mysql', 'mysqldb+mysql'])
+def test_connect_failure(database_name, scheme):
+    with pytest.raises(TypeError):
+        connect('{scheme}:///{db}?invalid_option=1'.format(
+            scheme=scheme, db=database_name,
+        ))

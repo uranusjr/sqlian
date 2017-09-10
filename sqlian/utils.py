@@ -1,4 +1,5 @@
 import collections
+import distutils.util
 import functools
 import inspect
 import itertools
@@ -17,6 +18,10 @@ def partition(predicate, iterable):
         six.moves.filterfalse(predicate, t1),
         six.moves.filter(predicate, t2),
     )
+
+
+def parse_boolean(value):
+    return bool(distutils.util.strtobool(value))
 
 
 def is_exception_class(obj):

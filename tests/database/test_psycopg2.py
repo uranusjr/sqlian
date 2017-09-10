@@ -12,6 +12,7 @@ def database_name(request):
     try:
         conn = psycopg2.connect(database='postgres')
     except psycopg2.OperationalError:
+        pytest.skip('database unavailable')
         return None
     conn.autocommit = True  # Required for CREATE DATABASE.
 
@@ -30,10 +31,6 @@ def database_name(request):
 
 @pytest.fixture
 def db(request, database_name):
-    if not database_name:
-        pytest.skip('database unavailable')
-        return None
-
     db = Psycopg2Database(database=database_name)
 
     with db.cursor() as cursor:

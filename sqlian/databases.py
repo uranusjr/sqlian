@@ -49,8 +49,8 @@ def register(scheme, klass, replaces_existing=False):
 
 # TODO: These don't actually work yet.
 
-# register('mysql', 'sqlian.mysql.MySQLDBDatabase')
-# register('mysqldb+mysql', 'sqlian.mysql.MySQLDBDatabase')
+register('mysql', 'sqlian.mysql.MySQLDBDatabase')
+register('mysqldb+mysql', 'sqlian.mysql.MySQLDBDatabase')
 # register('pymysql+mysql', 'sqlian.mysql.PyMySQLDatabase')
 
 register('postgresql', 'sqlian.postgresql.Psycopg2Database')
@@ -94,6 +94,7 @@ def connect(url):
         return engine_class(database=':memory:')
 
     parts = six.moves.urllib.parse.urlsplit(url)
+
     try:
         engine_class = ENGINE_CLASSES[parts.scheme]
     except KeyError:
@@ -103,17 +104,22 @@ def connect(url):
     if database.startswith('/'):
         database = database[1:]
 
-    # TODO: The result is late-winning when there are duplicate keys.
-    # This seems to be a good strategy to me, but *maybe* we should do
-    # something when there are duplicate options?
-    query_pairs = six.moves.urllib.parse.parse_qsl(parts.query)
-    options = collections.OrderedDict(query_pairs)
+    kwargs = {}
+    if parts.hostname:
+        kwargs['host'] = parts.hostname
+    if parts.port:
+        kwargs['port'] = parts.port
+    if database:
+        kwargs['database'] = database
+    if parts.username:
+        kwargs['username'] = parts.username
+    if parts.password:
+        kwargs['password'] = parts.password
+    if parts.query:
+        # TODO: The result is late-winning when there are duplicate keys.
+        # This seems to be a good strategy to me, but *maybe* we should do
+        # something when there are duplicate options?
+        query_pairs = six.moves.urllib.parse.parse_qsl(parts.query)
+        kwargs['options'] = collections.OrderedDict(query_pairs)
 
-    return engine_class(
-        host=parts.hostname,
-        port=parts.port,
-        database=database,
-        username=parts.username,
-        password=parts.password,
-        options=options,
-    )
+    return engine_class(**kwargs)
