@@ -64,6 +64,19 @@ class Database(object):
             if all_names is None or name in all_names:
                 setattr(self, name, member)
 
+    def connect(self, dbapi, **kwargs):
+        """Connect to the database.
+
+        This is called by :meth:`create_connection` to create the connection.
+        Keyword arguments to this method are passed directly from the class
+        constructor.
+
+        You should override this method to convert parameter names. The default
+        implementation simply calls the DB-API 2.0 interface's ``connect()``
+        with the passed keyword arguments.
+        """
+        return dbapi.connect(**kwargs)
+
     def create_connection(self, **kwargs):
         """Creates a connection.
 
@@ -78,7 +91,7 @@ class Database(object):
         """
         dbapi = self.get_dbapi2()
         self.populate_dbapi2_members(dbapi)
-        return dbapi.connect(**kwargs)
+        return self.connect(dbapi, **kwargs)
 
     def is_open(self):
         """Whether the connection is open.
@@ -121,13 +134,13 @@ class Database(object):
 
     # Things!
 
-    def execute_statement(self, statement, args, kwargs):
+    def execute_statement(self, statement_builder, args, kwargs):
         """Build a statement, and execute it on the connection.
 
         :rtype: RecordCollection
         """
         cursor = self._conn.cursor()
-        cursor.execute(statement)
+        cursor.execute(statement_builder(*args, **kwargs))
         return RecordCollection.from_cursor(cursor)
 
     def select(self, *args, **kwargs):
