@@ -63,6 +63,8 @@ Table of Contents
 
     installation
     quickstart
-    references
+    databases
+    engines
+    records
     inspirations
     indices-and-tables

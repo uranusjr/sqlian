@@ -14,11 +14,14 @@ ENGINE_CLASSES = collections.OrderedDict()
 class DuplicateScheme(ValueError):
     """Raised when :func:`register`-ing a database under an existing scheme.
     """
-    msg_template = '{0!r} is already registered to {1!r}'
+    def __init__(self, scheme, klass):
+        super(DuplicateScheme, self).__init__(
+            '{!r} is already registered to {!r}'.format(scheme, klass),
+        )
 
 
 class UnrecognizableScheme(ValueError):
-    """Raised when trying to :func:`connect` to an unknown scheme.
+    """Raised when :func:`connect` fails to recognize a scheme.
     """
     def __init__(self, scheme):
         super(UnrecognizableScheme, self).__init__(
@@ -82,6 +85,9 @@ def connect(url):
       ``db.sqlite3``. The third slash is to seperate path from the host. Use
       four slashes if you need to specify an absolute path. The default driver
       (built-in `sqlite3`) is used.
+
+    :param url: URL of the database to connect to.
+    :returns: A :class:`Database` instance with open connection.
     """
     # Special case sqlite://:memory: because urlsplit chokes on the colons.
     match = IN_MEMORY_DB_PATTERN.match(url)
@@ -123,13 +129,3 @@ def connect(url):
         kwargs['options'] = collections.OrderedDict(query_pairs)
 
     return engine_class(**kwargs)
-
-
-# HACK: Dynamically generate a list of available engines in the documentation.
-connect.__doc__ += """
-A list of available schemes:
-
-{}
-""".format('\n'.join(
-    '* ``{}``'.format(key) for key in ENGINE_CLASSES
-))

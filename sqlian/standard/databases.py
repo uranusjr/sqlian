@@ -47,8 +47,6 @@ class Database(object):
     @property
     def connection(self):
         """The underlying connection object. This property is read-only.
-
-        :returns: A DB-API 2.0 Connection object.
         """
         return self._conn
 
@@ -71,11 +69,13 @@ class Database(object):
         Keyword arguments to this method are passed directly from the class
         constructor.
 
-        You should override this method to convert parameter names. The default
-        implementation simply calls the DB-API 2.0 interface's ``connect()``
-        with the passed keyword arguments.
+        You should override this method to convert parameter names, call
+        ``connect()`` on the passed DB-API 2.0 interface, and return the
+        connection instance.
         """
-        return dbapi.connect(**kwargs)
+        raise NotImplementedError(
+            'Database subclass should implement connect()',
+        )
 
     def create_connection(self, **kwargs):
         """Creates a connection.
@@ -87,7 +87,7 @@ class Database(object):
         Keyword arguments to this method are passed directly from the class
         constructor.
 
-        :returns: A DB-API 2.0 interface object.
+        :returns: A DB-API 2.0 Connection object.
         """
         dbapi = self.get_dbapi2()
         self.populate_dbapi2_members(dbapi)

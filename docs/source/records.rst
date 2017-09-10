@@ -1,15 +1,17 @@
 Records
 =======
 
+.. currentmodule:: sqlian
+
 .. autosummary::
-    sqlian.Record
-    sqlian.RecordCollection
+    Record
+    RecordCollection
 
 
-.. autoclass:: sqlian.Record
+.. autoclass:: Record
     :members:
     :special-members:
     :exclude-members: __weakref__
 
-.. autoclass:: sqlian.RecordCollection
+.. autoclass:: RecordCollection
     :members:

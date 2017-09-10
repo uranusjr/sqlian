@@ -1,8 +1,7 @@
-.. currentmodule:: sqlian
-
-
 Quickstart
 ===========
+
+.. currentmodule:: sqlian
 
 SQLian is composed of three main parts:
 
@@ -36,7 +35,7 @@ dependencies to actually connect to, like ``psycopg2`` for PostgreSQL. You
 can also build your own database support, but we'll save that discussion for
 later.
 
-The `connect()` function returns a :class:`Database` instance, which
+The :func:`connect()` function returns a :class:`Database` instance, which
 conforms to the DB-API 2.0 specification (`PEP 249`_), so you can get to work
 directly if you know your way around. But there's a better way to do it.
 
