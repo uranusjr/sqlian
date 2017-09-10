@@ -1,3 +1,5 @@
+import contextlib
+
 import pytest
 import six
 
@@ -20,14 +22,12 @@ def database_name(request):
     conn.autocommit = True  # Required for CREATE DATABASE.
 
     database_name = 'test_sqlian_py_postgresql'
-    cursor = conn.cursor()
-    cursor.execute('CREATE DATABASE "{}"'.format(database_name))
-    cursor.close()
+    with contextlib.closing(conn.cursor()) as cursor:
+        cursor.execute('CREATE DATABASE "{}"'.format(database_name))
 
     def finalize():
-        cursor = conn.cursor()
-        cursor.execute('DROP DATABASE "{}"'.format(database_name))
-        cursor.close()
+        with contextlib.closing(conn.cursor()) as cursor:
+            cursor.execute('DROP DATABASE "{}"'.format(database_name))
         conn.close()
 
     request.addfinalizer(finalize)
@@ -42,21 +42,20 @@ def db(request, database_name):
 
     db = PyPostgreSQLDatabase(database=database_name)
 
-    cursor = db.cursor()
-    cursor.execute('''
-        DROP TABLE IF EXISTS "person"
-    ''')
-    cursor.execute('''
-        CREATE TABLE "person" (
-            "name" VARCHAR(10),
-            "occupation" VARCHAR(10),
-            "main_language" VARCHAR(10))
-    ''')
-    cursor.execute('''
-        INSERT INTO "person" ("name", "occupation", "main_language")
-        VALUES ('Mosky', 'Pinkoi', 'Python')
-    ''')
-    cursor.close()
+    with contextlib.closing(db.cursor()) as cursor:
+        cursor.execute('''
+            DROP TABLE IF EXISTS "person"
+        ''')
+        cursor.execute('''
+            CREATE TABLE "person" (
+                "name" VARCHAR(10),
+                "occupation" VARCHAR(10),
+                "main_language" VARCHAR(10))
+        ''')
+        cursor.execute('''
+            INSERT INTO "person" ("name", "occupation", "main_language")
+            VALUES ('Mosky', 'Pinkoi', 'Python')
+        ''')
 
     def finalize():
         db.close()

@@ -36,21 +36,20 @@ def db(request, database_name):
 
     db = Psycopg2Database(database=database_name)
 
-    cursor = db.cursor()
-    cursor.execute('''
-        DROP TABLE IF EXISTS "person"
-    ''')
-    cursor.execute('''
-        CREATE TABLE "person" (
-            "name" VARCHAR(10),
-            "occupation" VARCHAR(10),
-            "main_language" VARCHAR(10))
-    ''')
-    cursor.execute('''
-        INSERT INTO "person" ("name", "occupation", "main_language")
-        VALUES ('Mosky', 'Pinkoi', 'Python')
-    ''')
-    cursor.close()
+    with db.cursor() as cursor:
+        cursor.execute('''
+            DROP TABLE IF EXISTS "person"
+        ''')
+        cursor.execute('''
+            CREATE TABLE "person" (
+                "name" VARCHAR(10),
+                "occupation" VARCHAR(10),
+                "main_language" VARCHAR(10))
+        ''')
+        cursor.execute('''
+            INSERT INTO "person" ("name", "occupation", "main_language")
+            VALUES ('Mosky', 'Pinkoi', 'Python')
+        ''')
 
     def finalize():
         db.close()
