@@ -4,8 +4,9 @@
 /*.egg-info
 /build
 /dist
+/docs/build
+
+/Pipfile.lock
 
 __pycache__
 *.pyc
-
-/docs/build
