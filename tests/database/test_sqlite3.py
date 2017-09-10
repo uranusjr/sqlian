@@ -1,3 +1,5 @@
+import contextlib
+
 import pytest
 
 from sqlian import connect, star
@@ -9,18 +11,17 @@ def db(request, tmpdir):
     dbpath = tmpdir.join('sqlian-test.sqlite3')
     db = SQLite3Database(database=str(dbpath))
 
-    cursor = db.cursor()
-    cursor.execute('''
-        CREATE TABLE "person" (
-            "name" TEXT,
-            "occupation" TEXT,
-            "main_language" TEXT)
-    ''')
-    cursor.execute('''
-        INSERT INTO "person" ("name", "occupation", "main_language")
-        VALUES ('Mosky', 'Pinkoi', 'Python')
-    ''')
-    cursor.close()
+    with contextlib.closing(db.cursor()) as cursor:
+        cursor.execute('''
+            CREATE TABLE "person" (
+                "name" TEXT,
+                "occupation" TEXT,
+                "main_language" TEXT)
+        ''')
+        cursor.execute('''
+            INSERT INTO "person" ("name", "occupation", "main_language")
+            VALUES ('Mosky', 'Pinkoi', 'Python')
+        ''')
 
     def finalize():
         db.close()
@@ -55,10 +56,9 @@ def test_connect(tmpdir, scheme):
     db = connect('{scheme}:///{path}'.format(scheme=scheme, path=dbpath))
     assert db.is_open()
 
-    cursor = db.cursor()
-    cursor.execute('''CREATE TABLE "person" ("name" TEXT)''')
-    cursor.execute('''INSERT INTO "person" VALUES ('Mosky')''')
-    cursor.close()
+    with contextlib.closing(db.cursor()) as cursor:
+        cursor.execute('''CREATE TABLE "person" ("name" TEXT)''')
+        cursor.execute('''INSERT INTO "person" VALUES ('Mosky')''')
 
     record, = db.select(star, from_='person')
     assert record.name == 'Mosky'
