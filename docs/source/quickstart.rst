@@ -3,11 +3,12 @@ Quickstart
 
 SQLian is composed of three main parts:
 
-* **Connectors** connect to a database.
+* **Databases** represent database connections.
 * **Statement builders** take native objects and convert them to a SQL command
-  string. The command can then be executed by the connector in the database.
-* **Records** are wrappers providing a clean, nice interface to interact with
-  the database cursor, and the data it retrieves.
+  string. The built command are then passed to the associated database
+  connection to be executed.
+* **Records** are returned by database queries. They offer a clean, nice
+  interface to interact with the data retrieved from the database.
 
 Let's do a quick walk through on them one by one.
 

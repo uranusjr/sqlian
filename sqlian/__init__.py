@@ -2,8 +2,9 @@ from .base import (
     NativeRow, Parsable, is_single_row,
     Sql, UnescapableError, UnsupportedParameterError,
 )
+from .databases import DuplicateScheme, UnrecognizableScheme, connect, register
 from .records import Record, RecordCollection
-from .standard import star
+from .standard import star, Database, Engine
 
 
 __all__ = [
@@ -12,7 +13,8 @@ __all__ = [
 
     'Record', 'RecordCollection',
 
-    'star',
+    'DuplicateScheme', 'UnrecognizableScheme', 'connect', 'register',
+    'star', 'Database', 'Engine',
 ]
 
 

@@ -1,9 +1,21 @@
-Databases
-=========
+Database Conenctions
+====================
+
 
 .. autosummary::
-    sqlian.standard.Database
+    sqlian.DuplicateScheme
+    sqlian.UnrecognizableScheme
+    sqlian.register
+    sqlian.connect
+    sqlian.Database
 
+.. autoclass:: sqlian.DuplicateScheme
 
-.. autoclass:: sqlian.standard.Database
+.. autoclass:: sqlian.UnrecognizableScheme
+
+.. autofunction:: sqlian.register
+
+.. autofunction:: sqlian.connect
+
+.. autoclass:: sqlian.Database
     :members:

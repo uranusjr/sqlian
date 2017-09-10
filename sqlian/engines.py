@@ -1,14 +1,18 @@
 from .mysql.engines import Engine as MySQLEngine
 from .postgresql.engines import Engine as PostgreSQLEngine
+from .sqlite.engines import Engine as SQLiteEngine
 from .standard.engines import Engine as StantardEngine
 
 
 __all__ = [
-    'MySQLEngine', 'PostgreSQLEngine', 'StantardEngine',
-    'mysql', 'postgresql', 'standard',
+    'StantardEngine', 'standard',
+    'MySQLEngine', 'PostgreSQLEngine', 'SQLiteEngine',
+    'mysql', 'postgresql', 'sqlite',
 ]
 
 
+standard = StantardEngine()
+
 mysql = MySQLEngine()
 postgresql = PostgreSQLEngine()
-standard = StantardEngine()
+sqlite = SQLiteEngine()

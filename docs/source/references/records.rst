@@ -2,11 +2,14 @@ Records
 =======
 
 .. autosummary::
-    sqlian.records.Record
-    sqlian.records.RecordCollection
+    sqlian.Record
+    sqlian.RecordCollection
 
 
-.. automodule:: sqlian.records
+.. autoclass:: sqlian.Record
     :members:
     :special-members:
     :exclude-members: __weakref__
+
+.. autoclass:: sqlian.RecordCollection
+    :members:

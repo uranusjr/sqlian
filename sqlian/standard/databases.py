@@ -12,21 +12,24 @@ class Database(object):
     offering additional SQL-building methods alongside with the standard API.
 
     Keyord arguments passed to the constructor are used to create the
-    underlying `Connection` instance. See documentation of the underlying
-    DB-API 2.0 module for appropriate parameters to pass.
+    underlying `Connection` instance. The implementor is responsible for
+    converting them for the underlying DB-API 2.0 interface.
 
     Instances of this class implement the context manager interface. The
     instance itself is assigned to the **as** expression, and the connection
     is closed when the context manager exists, committing done automatically
     if there are no exceptions.
 
+    :param host: Network location of the database.
+    :param port: Network port to access the database.
+    :param database: Name of the database.
+    :param username: Username to connect to the database.
+    :param password: Password to connect to the database.
+    :param options: Database options as a string-string mapping.
+
     .. _`DB-API 2.0`: https://www.python.org/dev/peps/pep-0249
     """
     def __init__(self, **kwargs):
-        # Typical signature:
-        # __init__(
-        #   self, database, host=None, port=None, user=None, password=None,
-        #   params=None, options=None)
         self._conn = self.create_connection(**kwargs)
         self.engine = self.engine_class()
 
