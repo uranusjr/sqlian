@@ -68,4 +68,4 @@ Table of Contents
     records
     sql
     inspirations
-    indices-and-tables
+    genindex
