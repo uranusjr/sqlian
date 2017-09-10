@@ -55,7 +55,6 @@ def register(scheme, klass, replaces_existing=False):
 
 register('postgresql', 'sqlian.postgresql.Psycopg2Database')
 register('psycopg2+postgresql', 'sqlian.postgresql.Psycopg2Database')
-# register('py-postgresql+postgresql','sqlian.postgresql.PyPostgreSQLDatabase')
 
 register('sqlite', 'sqlian.sqlite.SQLite3Database')
 register('sqlite3+sqlite', 'sqlian.sqlite.SQLite3Database')

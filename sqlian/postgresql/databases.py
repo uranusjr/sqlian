@@ -19,8 +19,3 @@ class Psycopg2Database(Database):
         with compat.suppress(KeyError):
             kwargs.update(kwargs.pop('options'))
         return dbapi.connect(**kwargs)
-
-
-class PyPostgreSQLDatabase(Database):
-    dbapi2_module_name = 'postgresql.driver.dbapi20'
-    engine_class = Engine
