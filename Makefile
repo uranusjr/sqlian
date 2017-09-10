@@ -1,5 +1,7 @@
 ALL: help
 
+PYTHON = pipenv run python --
+
 .PHONY: help build check clean docs lint test tox upload watch
 
 help:
@@ -15,10 +17,10 @@ help:
 	@echo '  upload - Upload package to PyPI (implies build)'
 
 build: clean
-	pipenv run python setup.py sdist bdist_wheel
+	$(PYTHON) setup.py sdist bdist_wheel
 
 check:
-	pipenv run python setup.py check --restructuredtext --strict
+	$(PYTHON) setup.py check --restructuredtext --strict
 
 clean:
 	rm -rf build dist *.egg-info
@@ -26,7 +28,7 @@ clean:
 	find . -name __pycache__ -exec rm -r {} +
 
 docs:
-	cd docs && make html
+	$(PYTHON) -m sphinx -M html 'docs/source' 'docs/build'
 
 lint:
 	pipenv run flake8 --isolated
