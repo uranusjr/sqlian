@@ -23,7 +23,7 @@ check:
 	$(PYTHON) setup.py check --restructuredtext --strict
 
 clean:
-	rm -rf build dist *.egg-info
+	rm -rf build dist docs/build *.egg-info
 	find . -name \*.pyc -delete
 	find . -name __pycache__ -exec rm -r {} +
 

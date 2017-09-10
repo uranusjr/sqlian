@@ -39,7 +39,6 @@ sys.path.insert(0, PROJECT_ROOT)
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

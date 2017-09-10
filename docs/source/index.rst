@@ -66,5 +66,6 @@ Table of Contents
     databases
     engines
     records
+    sql
     inspirations
     indices-and-tables

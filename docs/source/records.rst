@@ -3,11 +3,6 @@ Records
 
 .. currentmodule:: sqlian
 
-.. autosummary::
-    Record
-    RecordCollection
-
-
 .. autoclass:: Record
     :members:
     :special-members:
