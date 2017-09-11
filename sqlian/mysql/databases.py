@@ -20,6 +20,8 @@ class MySQLDBDatabase(Database):
 
     def connect(self, dbapi, **kwargs):
         with compat.suppress(KeyError):
+            kwargs['user'] = kwargs.pop('username')
+        with compat.suppress(KeyError):
             kwargs['passwd'] = kwargs.pop('password')
         with compat.suppress(KeyError):
             kwargs['db'] = kwargs.pop('database')
@@ -38,5 +40,26 @@ class MySQLDBDatabase(Database):
 
 
 class PyMySQLDatabase(Database):
+
     dbapi2_module_name = 'pymysql'
     engine_class = Engine
+    option_converters = {
+        'connect_timeout': int,
+        'use_unicode': parse_boolean,
+    }
+
+    def connect(self, dbapi, **kwargs):
+        with compat.suppress(KeyError):
+            kwargs['user'] = kwargs.pop('username')
+
+        # See PyMySQL documentation for a list of valid parameters.
+        # We don't enforece anything; the user should be responsible for
+        # whatever is passed in.
+        # http://pymysql.readthedocs.io/en/latest/modules/connections.html
+        with compat.suppress(KeyError):
+            options = kwargs.pop('options')
+            kwargs.update({
+                key: self.option_converters.get(key, noop)(value)
+                for key, value in options.items()
+            })
+        return dbapi.connect(**kwargs)

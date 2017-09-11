@@ -16,7 +16,7 @@ def database_name(request):
     except pymysql.OperationalError:
         return None
 
-    database_name = 'test_sqlian_mysqldb'
+    database_name = 'test_sqlian_pymysql'
     with conn.cursor() as cursor:
         cursor.execute('CREATE DATABASE `{}`'.format(database_name))
 
