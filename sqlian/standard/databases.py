@@ -137,6 +137,18 @@ class Database(object):
     def execute_statement(self, statement_builder, args, kwargs):
         """Build a statement, and execute it on the connection.
 
+        This method provides implementation of statement construction and
+        execution. Call this method like this when you implement a statement
+        builder in custom database subclasses:
+
+        .. code-block:: python
+
+            def select(self, *args, **kwargs):
+                return self.execute_statement(self.engine.select, args, kwargs)
+
+        You generally don't need to call this method directly as a user, but
+        use one of the wrapper functions like the above instead.
+
         :rtype: RecordCollection
         """
         cursor = self._conn.cursor()
