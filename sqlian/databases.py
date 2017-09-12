@@ -54,7 +54,7 @@ def register(scheme, klass, replaces_existing=False):
 
 register('mysql', 'sqlian.mysql.MySQLDBDatabase')
 register('mysqldb+mysql', 'sqlian.mysql.MySQLDBDatabase')
-# register('pymysql+mysql', 'sqlian.mysql.PyMySQLDatabase')
+register('pymysql+mysql', 'sqlian.mysql.PyMySQLDatabase')
 
 register('postgresql', 'sqlian.postgresql.Psycopg2Database')
 register('psycopg2+postgresql', 'sqlian.postgresql.Psycopg2Database')

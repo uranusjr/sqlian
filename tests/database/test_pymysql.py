@@ -2,7 +2,7 @@ import warnings
 
 import pytest
 
-from sqlian import star
+from sqlian import connect, star
 from sqlian.mysql import PyMySQLDatabase
 
 
@@ -77,3 +77,28 @@ def test_insert(db):
     assert len(rows) == 0
     names = [r.name for r in db.select('name', from_='person')]
     assert names == ['Mosky', 'Keith']
+
+
+@pytest.mark.parametrize('scheme', ['pymysql+mysql'])
+def test_connect(database_name, scheme):
+    db = connect('{scheme}:///{db}?charset=utf8&use_unicode=1'.format(
+        scheme=scheme, db=database_name,
+    ))
+    assert db.is_open()
+
+    with db.cursor() as cursor, warnings.catch_warnings():
+        warnings.filterwarnings('ignore')
+        cursor.execute('''DROP TABLE IF EXISTS `person`''')
+        cursor.execute('''CREATE TABLE `person` (`name` TEXT)''')
+        cursor.execute('''INSERT INTO `person` VALUES ('Mosky')''')
+
+    record, = db.select(star, from_='person')
+    assert record.name == 'Mosky'
+
+
+@pytest.mark.parametrize('scheme', ['pymysql+mysql'])
+def test_connect_failure(database_name, scheme):
+    with pytest.raises(TypeError):
+        connect('{scheme}:///{db}?invalid_option=1'.format(
+            scheme=scheme, db=database_name,
+        ))
