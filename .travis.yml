@@ -9,7 +9,7 @@ python:
   - "pypy3"
 
 install:
-  - pip install pipenv
+  - pip install 'pipenv!=6.2.4'
   - pipenv install --dev --skip-lock
 
 script:
