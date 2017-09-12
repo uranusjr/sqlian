@@ -13,4 +13,10 @@ install:
   - pipenv install --dev --skip-lock
 
 script:
-  - make test
+  - pipenv run pytest
+
+jobs:
+  include:
+    - stage: Lint
+      python: "3.6"
+      script: make lint
